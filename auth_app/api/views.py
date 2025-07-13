@@ -1,9 +1,13 @@
 from rest_framework import status
 from rest_framework.views import APIView
-from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
+from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView, TokenBlacklistView
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
-from .serializers import RegistrationSerializer, CustomTokenObtainPairSerializer
+from .serializers import (
+    RegistrationSerializer,
+    LogoutSerializer,
+    CustomTokenObtainPairSerializer,
+)
 
 class HelloWorldView(APIView):
     permission_classes = [IsAuthenticated]
@@ -30,8 +34,23 @@ class RegistrationView(APIView):
             ######### HIER WEITERLEITUNG ZUR BESTÄTIGUNGS-MAIL EINFÜGEN ###########
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        
-    
+
+
+class LogoutView(TokenBlacklistView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, *args, **kwargs):
+        serializer = LogoutSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        response = super().post(request, *args, **kwargs)
+
+        if response.status_code == status.HTTP_205_RESET_CONTENT:
+            return Response({"detail": "Logout successful."}, status=status.HTTP_200_OK)
+
+        return response
+
 class CookieTokenObtainPairView(TokenObtainPairView):
     serializer_class = CustomTokenObtainPairSerializer
 
@@ -88,7 +107,7 @@ class CookieTokenRefreshView(TokenRefreshView):
                     "detail": "Token refreshed",
                     "access": "new_access_token"
                 }, status=status.HTTP_200_OK)
-                
+
         response.set_cookie(
             key="access_token",
             value=access_token,

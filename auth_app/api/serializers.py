@@ -35,6 +35,10 @@ class RegistrationSerializer(serializers.ModelSerializer):
         account.set_password(pw)
         account.save()
         return account
+
+class LogoutSerializer(serializers.Serializer):
+    refresh = serializers.CharField(required=True)
+    
     
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
     email = serializers.EmailField()
