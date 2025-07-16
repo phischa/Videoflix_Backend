@@ -69,7 +69,10 @@ ROOT_URLCONF = 'core.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [
+            BASE_DIR / 'templates',
+            BASE_DIR / 'auth_app' / 'templates',
+        ],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -116,6 +119,44 @@ AUTH_PASSWORD_VALIDATORS = [
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
+
+
+# EMAIL CONFIGURATION
+
+if DEBUG:
+    # Development
+    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+    DEFAULT_FROM_EMAIL = 'noreply@videoflix-dev.com'
+    
+else:
+    # Production:
+    EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+    EMAIL_HOST = os.getenv('EMAIL_HOST', 'smtp.gmail.com')
+    EMAIL_PORT = int(os.getenv('EMAIL_PORT', 587))
+    EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
+    EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
+    EMAIL_USE_TLS = os.getenv('EMAIL_USE_TLS', 'True').lower() == 'true'
+    EMAIL_USE_SSL = os.getenv('EMAIL_USE_SSL', 'False').lower() == 'true'
+    DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', EMAIL_HOST_USER)
+
+
+EMAIL_TIMEOUT = 30  # Timeout in Sekunden
+EMAIL_SUBJECT_PREFIX = '[Videoflix] '
+
+
+# TEMPLATE CONFIGURATION FOR MAILS
+
+TEMPLATES[0]['DIRS'] = [
+    BASE_DIR / 'templates',
+    BASE_DIR / 'auth_app' / 'templates',
+]
+
+
+# ACTIVATION TOKEN SETTINGS
+
+ACTIVATION_TOKEN_EXPIRY_HOURS = int(os.getenv('ACTIVATION_TOKEN_EXPIRY_HOURS', 24))
+FRONTEND_URL = os.getenv('FRONTEND_URL', 'http://localhost:4200')
+
 
 # Config for Redis and RQ
 
