@@ -1,0 +1,27 @@
+Hallo {{ user.email }}!
+
+Vielen Dank für Ihre Registrierung bei Videoflix! 🎉
+
+Um Ihr Konto zu aktivieren und mit dem Streamen zu beginnen, 
+besuchen Sie bitte den folgenden Link:
+
+{{ activation_url }}
+
+WICHTIG:
+- Dieser Link ist 24 Stunden gültig
+- Er kann nur einmal verwendet werden
+- Falls Sie diese E-Mail nicht angefordert haben, ignorieren Sie sie einfach
+
+Nach der Aktivierung haben Sie Zugriff auf:
+✓ Tausende von Filmen und Serien
+✓ HD und 4K Streaming  
+✓ Personalisierte Empfehlungen
+✓ Downloads für offline Viewing
+
+Bei Fragen wenden Sie sich gerne an unser Support-Team.
+
+Mit freundlichen Grüßen,
+Das Videoflix Team
+
+--
+© 2025 Videoflix. Alle Rechte vorbehalten.

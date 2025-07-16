@@ -33,14 +33,13 @@ class RegistrationSerializer(serializers.ModelSerializer):
         pw = self.validated_data['password']
         email = self.validated_data['email']
 
-        # USERNAME AUS EMAIL GENERIEREN (unique)
-        # Prüfe ob User mit dieser Email als Username bereits existiert
         if User.objects.filter(username=email).exists():
             raise serializers.ValidationError({'email': 'User with this email already exists'})
         
         account = User(
             email=email,
-            username=email  # Email als Username verwenden
+            username=email,
+            is_active=False
         )
         account.set_password(pw)
         account.save()
@@ -65,6 +64,9 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
             user = User.objects.get(email=email)
         except User.DoesNotExist:
             raise serializers.ValidationError("Invalid email or password")
+        
+        if not user.is_active:
+            raise serializers.ValidationError("Account not activated. Please check your email for activation link.")
         
         if not user.check_password(password):
             raise serializers.ValidationError("Invalid email or password")

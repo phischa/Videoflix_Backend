@@ -4,6 +4,7 @@ from .views import (
     LogoutView,
     CookieTokenObtainPairView,
     CookieTokenRefreshView,
+    AccountActivationView,
     HelloWorldView,
 )
 
@@ -13,7 +14,7 @@ urlpatterns = [
     path('logout/', LogoutView.as_view(), name='logout'),
     path('token/refresh/', CookieTokenRefreshView.as_view(), name='token_refresh'), 
 
-    #path("activate/<uidb64>/<token>/", ),
+    path("activate/<str:uidb64>/<str:token>/", AccountActivationView.as_view(), name='account_activate'),
     #path("password_reset/", ),
     #path("password_confirm/<uidb64>/<token>/",),
 
