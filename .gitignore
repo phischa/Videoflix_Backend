@@ -143,6 +143,9 @@ GitHub.sublime-settings
 backup.json
 htmlcov
 
+# Bruno 
+/Videoflix
+
 # Additional Environment & Configuration #
 .env
 .env.local

@@ -5,7 +5,6 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from .serializers import (
     RegistrationSerializer,
-    LogoutSerializer,
     CustomTokenObtainPairSerializer,
 )
 
@@ -26,9 +25,11 @@ class RegistrationView(APIView):
         if serializer.is_valid():
             saved_account = serializer.save()
             data = {
-                'username': saved_account.username,
-                'email': saved_account.email,
-                'user_id': saved_account.pk
+                "user": {
+                    "id": saved_account.pk,
+                    "email": saved_account.email
+                },
+                "token": "activation_token"
             }
             return Response(data, status=status.HTTP_201_CREATED)
             ######### HIER WEITERLEITUNG ZUR BESTÄTIGUNGS-MAIL EINFÜGEN ###########
@@ -36,19 +37,36 @@ class RegistrationView(APIView):
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-class LogoutView(TokenBlacklistView):
-    permission_classes = [IsAuthenticated]
+class LogoutView(APIView):
+    permission_classes = [AllowAny]  # Nur Cookie erforderlich
 
     def post(self, request, *args, **kwargs):
-        serializer = LogoutSerializer(data=request.data)
-        if not serializer.is_valid():
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-        response = super().post(request, *args, **kwargs)
-
-        if response.status_code == status.HTTP_205_RESET_CONTENT:
-            return Response({"detail": "Logout successful."}, status=status.HTTP_200_OK)
-
+        refresh_token = request.COOKIES.get("refresh_token")
+        
+        if refresh_token is None:
+            return Response(
+                {"detail": "Refresh token missing"}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        try:
+            from rest_framework_simplejwt.tokens import RefreshToken
+            token = RefreshToken(refresh_token)
+            token.blacklist()
+            
+        except Exception:
+            return Response(
+                {"detail": "Invalid refresh token"}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        response = Response({
+            "detail": "Log-Out successfully! All Tokens will be deleted. Refresh token is blacklisted."
+        }, status=status.HTTP_200_OK)
+        
+        response.delete_cookie("access_token")
+        response.delete_cookie("refresh_token")
+        
         return response
 
 class CookieTokenObtainPairView(TokenObtainPairView):

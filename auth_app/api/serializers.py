@@ -1,13 +1,14 @@
 from rest_framework import serializers
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from django.contrib.auth.models import User
+    
 
 class RegistrationSerializer(serializers.ModelSerializer):
-    repeated_password = serializers.CharField(write_only=True)
+    confirmed_password = serializers.CharField(write_only=True)
 
     class Meta:
         model = User
-        fields = ['username', 'email', 'password', 'repeated_password']
+        fields = ['email', 'password', 'confirmed_password']
         extra_kwargs = {
             'password': {
                 'write_only': True
@@ -17,7 +18,7 @@ class RegistrationSerializer(serializers.ModelSerializer):
             }
         }
 
-    def validate_repeated_password(self, value):
+    def validate_confirmed_password(self, value):
         password = self.initial_data.get('password')
         if password and value and password != value:
             raise serializers.ValidationError('Passwords do not match')
@@ -30,34 +31,39 @@ class RegistrationSerializer(serializers.ModelSerializer):
 
     def save(self):
         pw = self.validated_data['password']
+        email = self.validated_data['email']
 
-        account = User(email=self.validated_data['email'], username=self.validated_data['username'])
+        # USERNAME AUS EMAIL GENERIEREN (unique)
+        # Prüfe ob User mit dieser Email als Username bereits existiert
+        if User.objects.filter(username=email).exists():
+            raise serializers.ValidationError({'email': 'User with this email already exists'})
+        
+        account = User(
+            email=email,
+            username=email  # Email als Username verwenden
+        )
         account.set_password(pw)
         account.save()
         return account
 
-class LogoutSerializer(serializers.Serializer):
-    refresh = serializers.CharField(required=True)
-    
-    
+
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
     email = serializers.EmailField()
-    password = serializers.CharField(write_only = True)
+    password = serializers.CharField(write_only=True)
 
     def __init__(self, *args, **kwargs):   
         super().__init__(*args, **kwargs)   
 
-        if "username" in self.fields:       #Überschreibt die TokenObtainSerializer, von der der Serializer erbt
-            self.fields.pop("username")     #und popt den username raus, damit der login nur mit der mail funktioniert.
+        if "username" in self.fields:
+            self.fields.pop("username")
 
     def validate(self, attrs):
-        print("123")
         email = attrs.get("email")
         password = attrs.get("password")
 
         try:
             user = User.objects.get(email=email)
-        except user.DoesNotExist:
+        except User.DoesNotExist:
             raise serializers.ValidationError("Invalid email or password")
         
         if not user.check_password(password):
