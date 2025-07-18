@@ -74,3 +74,84 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
         attrs['username'] = user.username
         data = super().validate(attrs)
         return data
+    
+
+class PasswordResetSerializer(serializers.Serializer):
+    """
+    Serializer for password reset request
+    Used for: POST /api/password_reset/
+    """
+    email = serializers.EmailField()
+
+    def validate_email(self, value):
+        """
+        Validate email format and check if user exists
+        Note: For security reasons, not revealing if user exists or not
+        """
+        # Basic email format validation (already done by EmailField)
+        if not value:
+            raise serializers.ValidationError('Email is required')
+        
+        # Store the user for later use if exists (but don't reveal if not)
+        try:
+            user = User.objects.get(email=value)
+            # Store user in instance for later access
+            self.user = user
+        except User.DoesNotExist:
+            self.user = None
+        
+        return value
+
+
+class PasswordConfirmSerializer(serializers.Serializer):
+    """
+    Serializer for password confirmation/reset
+    Used for: POST /api/password_confirm/<uidb64>/<token>/
+    """
+    new_password = serializers.CharField(
+        write_only=True,
+        min_length=8,
+        style={'input_type': 'password'}
+    )
+    confirm_password = serializers.CharField(
+        write_only=True,
+        style={'input_type': 'password'}
+    )
+
+    def validate_new_password(self, value):
+        """
+        Validate new password using Django's built-in validators
+        """
+        from django.contrib.auth.password_validation import validate_password
+        from django.core.exceptions import ValidationError as DjangoValidationError
+        
+        try:
+            # Use Django's built-in password validators
+            validate_password(value)
+        except DjangoValidationError as e:
+            raise serializers.ValidationError(list(e.messages))
+        
+        return value
+
+    def validate_confirm_password(self, value):
+        """
+        Validate password confirmation matches new password
+        """
+        new_password = self.initial_data.get('new_password')
+        if new_password and value and new_password != value:
+            raise serializers.ValidationError('Passwords do not match')
+        return value
+
+    def validate(self, attrs):
+        """
+        Cross-field validation to ensure passwords match
+        """
+        new_password = attrs.get('new_password')
+        confirm_password = attrs.get('confirm_password')
+        
+        if new_password != confirm_password:
+            raise serializers.ValidationError({
+                'confirm_password': 'Passwords do not match'
+            })
+        
+        return attrs
