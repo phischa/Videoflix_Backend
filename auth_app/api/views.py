@@ -214,7 +214,6 @@ class PasswordResetView(APIView):
             # Check if user exists (stored in serializer during validation)
             if hasattr(serializer, 'user') and serializer.user:
                 # User exists - send password reset email
-                from ..services.email_service import send_password_reset_email
                 
                 try:
                     email_sent = send_password_reset_email(serializer.user, request)
@@ -246,8 +245,6 @@ class PasswordConfirmView(APIView):
 
     def post(self, request, uidb64, token):
         # Validate the reset token first
-        from ..services.token_service import verify_password_reset_token, reset_user_password
-        
         user = verify_password_reset_token(uidb64, token)
         
         if not user:
