@@ -1,3 +1,4 @@
+import logging
 from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView, TokenBlacklistView
@@ -9,13 +10,21 @@ from ..services import (
     generate_activation_token,
     verify_activation_token,
     activate_user,
-    send_activation_email
+    send_activation_email,
+    send_password_reset_email,       
+    verify_password_reset_token,      
+    reset_user_password,  
 )
 
 from .serializers import (
     RegistrationSerializer,
     CustomTokenObtainPairSerializer,
+    PasswordResetSerializer,
+    PasswordConfirmSerializer
 )
+
+logger = logging.getLogger(__name__)
+
 
 class HelloWorldView(APIView):
     permission_classes = [IsAuthenticated]
@@ -189,3 +198,84 @@ class AccountActivationView(APIView):
             return Response({
                 "message": "Account successfully activated."
             }, status=status.HTTP_200_OK)
+        
+
+class PasswordResetView(APIView):
+    """
+    Handles password reset email sending
+    POST /api/password_reset/
+    """
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        serializer = PasswordResetSerializer(data=request.data)
+        
+        if serializer.is_valid():
+            # Check if user exists (stored in serializer during validation)
+            if hasattr(serializer, 'user') and serializer.user:
+                # User exists - send password reset email
+                from ..services.email_service import send_password_reset_email
+                
+                try:
+                    email_sent = send_password_reset_email(serializer.user, request)
+                    
+                    if email_sent:
+                        logger.info(f"Password reset email sent to {serializer.user.email}")
+                    else:
+                        logger.error(f"Failed to send password reset email to {serializer.user.email}")
+                        
+                except Exception as e:
+                    logger.error(f"Error sending password reset email: {e}")
+            
+            # ALWAYS return same success message for security
+            # (Don't reveal if user exists or not)
+            return Response({
+                "detail": "An email has been sent to reset your password."
+            }, status=status.HTTP_200_OK)
+        
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class PasswordConfirmView(APIView):
+    """
+    Handles password reset confirmation
+    POST /api/password_confirm/<uidb64>/<token>/
+    """
+    permission_classes = [AllowAny]
+
+    def post(self, request, uidb64, token):
+        # Validate the reset token first
+        from ..services.token_service import verify_password_reset_token, reset_user_password
+        
+        user = verify_password_reset_token(uidb64, token)
+        
+        if not user:
+            return Response({
+                "detail": "Invalid or expired password reset link"
+            }, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Validate the new password
+        serializer = PasswordConfirmSerializer(data=request.data)
+        
+        if serializer.is_valid():
+            new_password = serializer.validated_data['new_password']
+            
+            # Reset the password using token service
+            success = reset_user_password(user, new_password)
+            
+            if success:
+                logger.info(f"Password successfully reset for user {user.id} ({user.email})")
+                
+                return Response({
+                    "detail": "Your password has been successfully reset."
+                }, status=status.HTTP_200_OK)
+            else:
+                logger.error(f"Failed to reset password for user {user.id} ({user.email})")
+                
+                return Response({
+                    "detail": "Failed to reset password. Please try again."
+                }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

@@ -5,6 +5,8 @@ from .views import (
     CookieTokenObtainPairView,
     CookieTokenRefreshView,
     AccountActivationView,
+    PasswordResetView,
+    PasswordConfirmView,
     HelloWorldView,
 )
 
@@ -15,8 +17,8 @@ urlpatterns = [
     path('token/refresh/', CookieTokenRefreshView.as_view(), name='token_refresh'), 
 
     path("activate/<str:uidb64>/<str:token>/", AccountActivationView.as_view(), name='account_activate'),
-    #path("password_reset/", ),
-    #path("password_confirm/<uidb64>/<token>/",),
+    path('password_reset/', PasswordResetView.as_view(), name='password_reset'),
+    path('password_confirm/<str:uidb64>/<str:token>/', PasswordConfirmView.as_view(), name='password_confirm'),
 
     path('hello/', HelloWorldView.as_view(), name='hello')
 ]
