@@ -3,6 +3,7 @@ from rest_framework.views import APIView
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView, TokenBlacklistView
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
+from rest_framework_simplejwt.tokens import RefreshToken
 
 from ..services import (
     generate_activation_token,
@@ -59,7 +60,6 @@ class LogoutView(APIView):
             )
         
         try:
-            from rest_framework_simplejwt.tokens import RefreshToken
             token = RefreshToken(refresh_token)
             token.blacklist()
             
@@ -131,6 +131,7 @@ class CookieTokenRefreshView(TokenRefreshView):
             )
         
         access_token = serializer.validated_data.get("access")
+        new_refresh_token = serializer.validated_data.get("refresh")
 
         response = Response({
                     "detail": "Token refreshed",
@@ -144,6 +145,15 @@ class CookieTokenRefreshView(TokenRefreshView):
             secure=True,
             samesite="Lax"
         )
+
+        if new_refresh_token:
+            response.set_cookie(
+                key="refresh_token",
+                value=new_refresh_token,
+                httponly=True,
+                secure=True,
+                samesite="Lax"
+            )
 
         return response
 
