@@ -139,7 +139,7 @@ class ActivationTokenService:
             str: Complete activation URL
         """
         # Frontend URL from settings
-        frontend_url = getattr(settings, 'FRONTEND_URL', 'http://localhost:4200')
+        frontend_url = getattr(settings, 'BACKEND_URL', 'http://127.0.0.1:8000')
         
         # Activation path
         activation_path = f"/activate/{uidb64}/{token}/"

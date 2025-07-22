@@ -30,8 +30,15 @@ SECRET_KEY = os.getenv('SECRET_KEY', default='django-insecure-@#x5h3zj!g+8g1v@2^
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv('DEBUG', default=True)
 
-ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", default="localhost").split(",")
-CSRF_TRUSTED_ORIGINS = os.environ.get("CSRF_TRUSTED_ORIGINS", default="http://localhost:4200").split(",")
+ALLOWED_HOSTS = os.environ.get(
+    "ALLOWED_HOSTS", 
+    default="localhost,127.0.0.1,0.0.0.0"
+).split(",")
+
+CSRF_TRUSTED_ORIGINS = os.environ.get(
+    "CSRF_TRUSTED_ORIGINS",
+    default="http://127.0.0.1:5500,http://localhost:5500" # LiveServer Ports
+).split(",")
 
 
 # Application definitions
@@ -65,8 +72,10 @@ MIDDLEWARE = [
 ]
 
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:4200",
-    "http://127.0.0.1:4200",
+    #"http://localhost:4200", # Für Angular
+    #"http://127.0.0.1:4200",
+    "http://127.0.0.1:5500",  # Für LiveServer
+    "http://localhost:5500",  
     # "https://mydomain.com",  # Production
 ]
 
@@ -85,6 +94,13 @@ CORS_ALLOWED_HEADERS = [
 ]
 
 ROOT_URLCONF = 'core.urls'
+
+if DEBUG:
+    print(f"🐳 Docker Backend: http://localhost:8000")
+    print(f"🌐 LiveServer Frontend: http://127.0.0.1:5500")
+    print(f"✅ CORS Origins: {CORS_ALLOWED_ORIGINS}")
+    print(f"🔒 CSRF Origins: {CSRF_TRUSTED_ORIGINS}")
+
 
 TEMPLATES = [
     {
@@ -183,7 +199,8 @@ TEMPLATES[0]['DIRS'] = [
 # ACTIVATION TOKEN SETTINGS
 
 ACTIVATION_TOKEN_EXPIRY_HOURS = int(os.getenv('ACTIVATION_TOKEN_EXPIRY_HOURS', 24))
-FRONTEND_URL = os.getenv('FRONTEND_URL', 'http://localhost:4200')
+FRONTEND_URL = os.getenv('FRONTEND_URL', 'http://127.0.0.1:5500')
+BACKEND_URL = os.getenv('BACKEND_URL', 'http://127.0.0.1:8000')
 
 
 # Config for Redis and RQ
