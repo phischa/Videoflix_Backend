@@ -139,16 +139,16 @@ class ActivationTokenService:
             str: Complete activation URL
         """
         # Frontend URL from settings
-        frontend_url = getattr(settings, 'BACKEND_URL', 'http://127.0.0.1:8000')
+        backend_url = getattr(settings, 'BACKEND_URL', 'http://127.0.0.1:8000')
         
         # Activation path
         activation_path = f"/activate/{uidb64}/{token}/"
         
         # Complete URL
-        if frontend_url.endswith('/'):
-            frontend_url = frontend_url.rstrip('/')
+        if backend_url.endswith('/'):
+            backend_url = backend_url.rstrip('/')
         
-        activation_url = f"{frontend_url}/api{activation_path}"
+        activation_url = f"{backend_url}/api{activation_path}"
         
         logger.info(f"Created activation URL: {activation_url}")
         return activation_url
@@ -253,17 +253,17 @@ class PasswordResetTokenService:
         Returns:
             str: Complete password confirm URL
         """
-        # Frontend URL from settings
-        frontend_url = getattr(settings, 'FRONTEND_URL', 'http://localhost:4200')
+        # Backend URL from settings
+        backend_url = getattr(settings, 'BACKEND_URL', 'http://127.0.0.1:8000')
         
         # Password confirm path
         password_confirm_path = f"/password_confirm/{uidb64}/{token}/"
         
         # Complete URL
-        if frontend_url.endswith('/'):
-            frontend_url = frontend_url.rstrip('/')
+        if backend_url.endswith('/'):
+            backend_url = backend_url.rstrip('/')
         
-        password_confirm_url = f"{frontend_url}/api{password_confirm_path}"
+        password_confirm_url = f"{backend_url}/api{password_confirm_path}"
         
         logger.info(f"Created password reset URL: {password_confirm_url}")
         return password_confirm_url
