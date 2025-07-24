@@ -2,7 +2,7 @@ from rest_framework import serializers
 from video_app.models import Video
 
 
-class VideoListSerializer(serializers.Serializer):
+class VideoListSerializer(serializers.ModelSerializer):
     thumbnail_url = serializers.ReadOnlyField()
 
     class Meta:

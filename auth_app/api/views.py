@@ -6,6 +6,7 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
 
+
 from ..services import (
     generate_activation_token,
     verify_activation_token,
@@ -104,15 +105,17 @@ class CookieTokenObtainPairView(TokenObtainPairView):
             key="access_token",
             value=str(access),
             httponly=True,
-            secure=True,
-            samesite="Lax"
+            secure=False,
+            samesite="Lax",
+            path="/",
+            domain=None 
         )
 
         response.set_cookie(
             key="refresh_token",
             value=str(refresh),
             httponly=True,
-            secure=True,
+            secure=False,
             samesite="Lax"
         )
 
@@ -151,7 +154,7 @@ class CookieTokenRefreshView(TokenRefreshView):
             key="access_token",
             value=access_token,
             httponly=True,
-            secure=True,
+            secure=False,
             samesite="Lax"
         )
 
@@ -160,12 +163,11 @@ class CookieTokenRefreshView(TokenRefreshView):
                 key="refresh_token",
                 value=new_refresh_token,
                 httponly=True,
-                secure=True,
+                secure=False,
                 samesite="Lax"
             )
 
         return response
-
 
 class AccountActivationView(APIView):
     """
