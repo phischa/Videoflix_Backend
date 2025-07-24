@@ -95,12 +95,6 @@ CORS_ALLOWED_HEADERS = [
 
 ROOT_URLCONF = 'core.urls'
 
-if DEBUG:
-    print(f"🐳 Docker Backend: http://localhost:8000")
-    print(f"🌐 LiveServer Frontend: http://127.0.0.1:5500")
-    print(f"✅ CORS Origins: {CORS_ALLOWED_ORIGINS}")
-    print(f"🔒 CSRF Origins: {CSRF_TRUSTED_ORIGINS}")
-
 
 TEMPLATES = [
     {
