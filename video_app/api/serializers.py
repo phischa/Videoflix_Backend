@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Video
+from video_app.models import Video
 
 
 class VideoListSerializer(serializers.Serializer):
