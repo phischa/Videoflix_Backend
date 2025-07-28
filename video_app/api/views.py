@@ -54,3 +54,12 @@ class HLSManifestView(APIView):
             manifest_content, 
             content_type='application/vnd.apple.mpegurl'
         )         
+    
+
+class HLSSegmentView(APIView):
+    authentication_classes = [CookieJWTAuthentication]
+    permission_classes = [IsAuthenticated]
+    
+    def get(self, request, movie_id, resolution, segment):
+        # TODO: Validierung kommt hier
+        pass
