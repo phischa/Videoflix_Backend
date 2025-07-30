@@ -62,7 +62,7 @@ class HLSSegmentView(APIView):
     
     def get(self, request, movie_id, resolution, segment):
         try:
-            video = Video.objects.get(movie_id)
+            video = Video.objects.get(id=movie_id)
         except Video.DoesNotExist:
             return Response({"detail": "Video not found"}, status=404)
 
@@ -72,7 +72,7 @@ class HLSSegmentView(APIView):
 
         if not re.match(r'^\d{3}\.ts$', segment):  # nur 000.ts, 001.ts, etc.
             return Response({"detail": "Invalid segment name"}, status=404)
-        
+
         # File-Path konstruieren
         segment_file_path = f"media/hls/{video.id}/{resolution}/{segment}"
 
