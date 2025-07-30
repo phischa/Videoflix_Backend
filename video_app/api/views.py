@@ -1,4 +1,5 @@
 import os
+import re
 from django.http import Http404, HttpResponse 
 from rest_framework import generics
 from rest_framework.views import APIView
@@ -27,7 +28,6 @@ class HLSManifestView(APIView):
     permission_classes = [IsAuthenticated]
     
     def get(self, request, movie_id, resolution):
-        # Video validation (schon gemacht)
         try:
             video = Video.objects.get(id=movie_id)
         except Video.DoesNotExist:
@@ -61,5 +61,14 @@ class HLSSegmentView(APIView):
     permission_classes = [IsAuthenticated]
     
     def get(self, request, movie_id, resolution, segment):
-        # TODO: Validierung kommt hier
-        pass
+        try:
+            video = Video.objects.get(movie_id)
+        except Video.DoesNotExist:
+            return Response({"detail": "Video not found"}, status=404)
+
+        ALLOWED_RESOLUTIONS = ['120p', '360p', '720p', '1080p']
+        if resolution not in ALLOWED_RESOLUTIONS:
+            return Response({"detail": "Invalid resolution"}, status=404)
+
+        if not re.match(r'^\d{3}\.ts$', segment):  # nur 000.ts, 001.ts, etc.
+            return Response({"detail": "Invalid segment name"}, status=404)
