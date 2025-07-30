@@ -72,3 +72,20 @@ class HLSSegmentView(APIView):
 
         if not re.match(r'^\d{3}\.ts$', segment):  # nur 000.ts, 001.ts, etc.
             return Response({"detail": "Invalid segment name"}, status=404)
+        
+        # File-Path konstruieren
+        segment_file_path = f"media/hls/{video.id}/{resolution}/{segment}"
+
+        # Prüfen ob File existiert
+        if not os.path.exists(segment_file_path):
+            return Response({"detail": "Segment not found"}, status=404)
+
+        # File lesen (BINÄR für .ts files!)
+        with open(segment_file_path, 'rb') as f:  # 'rb' = read binary
+            segment_content = f.read()
+
+        # Raw-Content mit Video-Content-Type zurückgeben
+        return HttpResponse(
+            segment_content,
+            content_type='video/MP2T'
+        )
