@@ -38,13 +38,17 @@ class Video(models.Model):
             validate_file_size
         ],
         help_text="Original video file for processing (Max: 10GB)"
-        )
+    )
     processing_status = models.CharField(
         max_length=20, 
         choices=PROCESSING_STATUS_CHOICES, 
         default='pending', 
         db_index=True
-        )
+    )
+    processing_progress = models.PositiveIntegerField(
+        default=0, 
+        help_text="Processing progress in %"
+    )   
 
     class Meta:
         ordering = ['-created_at']
