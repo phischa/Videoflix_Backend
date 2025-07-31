@@ -99,7 +99,14 @@ class CookieTokenObtainPairView(TokenObtainPairView):
         refresh = serializer.validated_data["refresh"]
         access = serializer.validated_data["access"]
 
-        response = Response({"message": "Login succesful"}, status=status.HTTP_200_OK)
+        user = serializer.user 
+        response = Response({
+            "detail": "Login successful", 
+            "user": {
+                "id": user.id,
+                "username": user.email
+            }
+        }, status=status.HTTP_200_OK)
 
         response.set_cookie(
             key="access_token",

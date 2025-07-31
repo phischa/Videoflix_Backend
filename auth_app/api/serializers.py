@@ -71,6 +71,8 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
         if not user.check_password(password):
             raise serializers.ValidationError("Invalid email or password")
         
+        self.user = user
+
         attrs['username'] = user.username
         data = super().validate(attrs)
         return data

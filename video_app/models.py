@@ -2,7 +2,7 @@ from django.conf import settings
 from django.db import models
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
-from django.core.validators import FileExtensionValidator
+from django.core.validators import FileExtensionValidator, MinValueValidator, MaxValueValidator
 from .utils import validate_file_size
 
 
@@ -37,6 +37,7 @@ class Video(models.Model):
             FileExtensionValidator(allowed_extensions=['mp4', 'mov', 'avi', 'wmv', 'asf']),
             validate_file_size
         ],
+        null=True, blank=True, #nach Migration entfernen
         help_text="Original video file for processing (Max: 10GB)"
     )
     processing_status = models.CharField(
@@ -47,8 +48,33 @@ class Video(models.Model):
     )
     processing_progress = models.PositiveIntegerField(
         default=0, 
+        validators=[
+            MinValueValidator(0),
+            MaxValueValidator(100)
+        ],
         help_text="Processing progress in %"
-    )   
+    )
+    processing_error = models.TextField(
+        blank=True, 
+        null=True,
+        help_text="Error message if processing failed"
+    )
+    hls_directory = models.CharField(
+        max_length=500,
+        blank=True,
+        null=True, 
+        help_text="Path to HLS files directory"
+    )  
+    duration_seconds = models.PositiveIntegerField(
+        null=True, 
+        blank=True,
+        help_text="Video duration in seconds"
+    )
+    file_size_mb = models.PositiveIntegerField(
+        null=True, 
+        blank=True,
+        help_text="Original file size in MB"
+    )
 
     class Meta:
         ordering = ['-created_at']
