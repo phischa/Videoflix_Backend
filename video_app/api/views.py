@@ -32,6 +32,12 @@ class VideoListView(generics.ListAPIView):
     authentication_classes = [CookieJWTAuthentication]  
     permission_classes = [IsAuthenticated]
 
+    def get_serializer_context(self):
+        """Add request to serializer context for absolute URLs"""
+        context = super().get_serializer_context()
+        context['request'] = self.request
+        return context
+
     def dispatch(self, request, *args, **kwargs):
         print(f"DEBUG: Request to VideoListView")
         print(f"DEBUG: Authentication classes: {self.authentication_classes}")
@@ -50,7 +56,7 @@ class HLSManifestView(APIView):
             return Response({"detail": "Video not found"}, status=404)
     
         # Resolution validation
-        ALLOWED_RESOLUTIONS = ['120p', '360p', '720p', '1080p']
+        ALLOWED_RESOLUTIONS = ['360p', '480p', '720p', '1080p']
         if resolution not in ALLOWED_RESOLUTIONS:
             return Response({"detail": "Invalid resolution"}, status=404)
         
@@ -82,11 +88,11 @@ class HLSSegmentView(APIView):
         except Video.DoesNotExist:
             return Response({"detail": "Video not found"}, status=404)
 
-        ALLOWED_RESOLUTIONS = ['120p', '360p', '720p', '1080p']
+        ALLOWED_RESOLUTIONS = ['360p', '480p', '720p', '1080p']
         if resolution not in ALLOWED_RESOLUTIONS:
             return Response({"detail": "Invalid resolution"}, status=404)
 
-        if not re.match(r'^\d{3}\.ts$', segment):  # nur 000.ts, 001.ts, etc.
+        if not re.match(r'^(index\d+|\d{3})\.ts$', segment):
             return Response({"detail": "Invalid segment name"}, status=404)
 
         # File-Path konstruieren
