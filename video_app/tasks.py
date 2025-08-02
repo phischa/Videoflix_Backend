@@ -85,12 +85,12 @@ def setup_video_processing(video):
 
 def process_all_resolutions(video, input_path, output_dir):
     """
-    Process video into all HLS resolutions (120p, 360p, 720p, 1080p)
+    Process video into all HLS resolutions (480p, 360p, 720p, 1080p)
     Updates progress from 0% to 80%
     """
     resolutions = [
-        {'name': '120p', 'height': 120, 'bitrate': '200k'},
-        {'name': '360p', 'height': 360, 'bitrate': '800k'}, 
+        {'name': '360p', 'height': 360, 'bitrate': '800k'},
+        {'name': '480p', 'height': 480, 'bitrate': '1200k'},
         {'name': '720p', 'height': 720, 'bitrate': '2500k'},
         {'name': '1080p', 'height': 1080, 'bitrate': '5000k'},
     ]
