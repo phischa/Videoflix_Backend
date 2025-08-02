@@ -25,46 +25,27 @@ def queue_video_processing(video_id):
         logger.error("Failed to queue video %s for processing: %s", video_id, str(e))
         raise
 
+
 def process_video_to_hls(video_id):
     """
-    Background job: Convert video to HLS with multiple resolutions
+    Main background job: Convert video to HLS with multiple resolutions
+    Orchestrates the entire video processing pipeline
     """
+    video = None
     try:
         video = Video.objects.get(id=video_id)
-        video.processing_status = 'processing'
-        video.processing_progress = 0
-        video.save()
-
-        # File paths
-        input_path = video.original_file.path
-        output_dir = f"media/hls/{video.id}/"
-
-        # Create output directory
-        os.makedirs(output_dir, exist_ok=True)
-        video.hls_directory = output_dir
-        video.save()
-
-        # Resolutions to generate
-        resolutions = [
-            {'name': '120p', 'height': 120, 'bitrate': '200k'},
-            {'name': '360p', 'height': 360, 'bitrate': '800k'}, 
-            {'name': '720p', 'height': 720, 'bitrate': '2500k'},
-            {'name': '1080p', 'height': 1080, 'bitrate': '5000k'},
-        ]
-
-        for i, res in enumerate(resolutions):
-            process_resolution(input_path, output_dir, res)
-            
-            # Update progress (25% per resolution)
-            progress = int((i + 1) / len(resolutions) * 100)
-            video.processing_progress = progress
-            video.save()
+        logger.info("Starting HLS processing for Video %s: %s", video_id, video.title)
         
-        # Extract metadata
-        extract_video_metadata(video, input_path)
+        # Setup video processing
+        input_path, output_dir = setup_video_processing(video)
         
-        video.processing_status = 'completed'
-        video.save()
+        # Process all HLS resolutions
+        process_all_resolutions(video, input_path, output_dir)
+        
+        # Finalize with metadata and thumbnail
+        finalize_video_processing(video, input_path)
+        
+        logger.info("Video %s processing completed successfully", video_id)
 
     except Video.DoesNotExist:
         error_msg = f"Video with ID {video_id} not found"
@@ -78,6 +59,79 @@ def process_video_to_hls(video_id):
             video.processing_error = str(e)
             video.save()
         raise e
+
+
+def setup_video_processing(video):
+    """
+    Setup video for processing: status, directories, paths
+    Returns: (input_path, output_dir)
+    """
+    video.processing_status = 'processing'
+    video.processing_progress = 0
+    video.save()
+    
+    # Setup file paths
+    input_path = video.original_file.path
+    output_dir = f"media/hls/{video.id}/"
+    
+    # Create output directory
+    os.makedirs(output_dir, exist_ok=True)
+    video.hls_directory = output_dir
+    video.save()
+    
+    logger.debug("Video processing setup completed for video %s", video.id)
+    return input_path, output_dir
+
+
+def process_all_resolutions(video, input_path, output_dir):
+    """
+    Process video into all HLS resolutions (120p, 360p, 720p, 1080p)
+    Updates progress from 0% to 80%
+    """
+    resolutions = [
+        {'name': '120p', 'height': 120, 'bitrate': '200k'},
+        {'name': '360p', 'height': 360, 'bitrate': '800k'}, 
+        {'name': '720p', 'height': 720, 'bitrate': '2500k'},
+        {'name': '1080p', 'height': 1080, 'bitrate': '5000k'},
+    ]
+
+    logger.info("Processing %d resolutions for video %s", len(resolutions), video.id)
+
+    for i, res in enumerate(resolutions):
+        logger.debug("Processing resolution %s for video %s", res['name'], video.id)
+        process_resolution(input_path, output_dir, res)
+        
+        # Update progress (20% per resolution = 80% total for HLS)
+        progress = int((i + 1) / len(resolutions) * 80)
+        video.processing_progress = progress
+        video.save()
+        logger.debug("Video %s progress: %d%%", video.id, progress)
+    
+    logger.debug("All resolutions processed for video %s", video.id)
+
+
+def finalize_video_processing(video, input_path):
+    """
+    Final steps: extract metadata, generate thumbnail, mark as completed
+    Updates progress from 80% to 100%
+    """
+    # Extract metadata (85% progress)
+    logger.debug("Extracting metadata for video %s", video.id)
+    video.processing_progress = 85
+    video.save()
+    extract_video_metadata(video, input_path)
+    
+    # Generate thumbnail (95% progress)
+    logger.debug("Generating thumbnail for video %s", video.id)
+    video.processing_progress = 95
+    video.save()
+    generate_thumbnail(video, input_path)
+    
+    # Complete processing (100%)
+    video.processing_status = 'completed'
+    video.processing_progress = 100
+    video.save()
+    logger.debug("Video processing finalized for video %s", video.id)
 
 
 def process_resolution(input_path, output_dir, resolution):
@@ -155,3 +209,39 @@ def extract_video_metadata(video, input_path):
     except Exception as e:
         logger.error("Failed to extract metadata for video %s: %s", video.id, str(e))
         raise
+
+
+def generate_thumbnail(video, input_path):
+    """
+    Generate thumbnail from video at 5-second mark
+    """
+    try:
+        thumbnail_dir = "media/thumbnails/"
+        os.makedirs(thumbnail_dir, exist_ok=True)
+        
+        thumbnail_filename = f"{video.id}_thumb.jpg"
+        thumbnail_path = os.path.join(thumbnail_dir, thumbnail_filename)
+        
+        ffmpeg_cmd = [
+            'ffmpeg',
+            '-i', input_path,
+            '-ss', '00:00:05',        # Extract at 5-second mark
+            '-vframes', '1',          # Only 1 frame
+            '-q:v', '2',             # High quality (1-31, lower = better)
+            '-y',                    # Overwrite existing file
+            thumbnail_path
+        ]
+        
+        result = subprocess.run(ffmpeg_cmd, check=True, capture_output=True, text=True)
+
+        video.thumbnail = f"thumbnails/{thumbnail_filename}"
+        video.save()
+        logger.info("Thumbnail generated for video %s: %s", video.id, thumbnail_filename)
+        
+    except subprocess.CalledProcessError as e:
+        logger.error("FFmpeg thumbnail generation failed for video %s: %s", video.id, e.stderr)
+        # Don't raise - thumbnail failure shouldn't fail the whole job
+        
+    except Exception as e:
+        logger.error("Failed to generate thumbnail for video %s: %s", video.id, str(e))
+        # Don't raise - thumbnail failure shouldn't fail the whole job
