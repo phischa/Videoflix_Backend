@@ -2,6 +2,8 @@ import os
 import re
 from django.http import Http404, HttpResponse
 from django.conf import settings
+from django.views.decorators.cache import never_cache
+from django.utils.decorators import method_decorator
 from rest_framework import generics
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -26,6 +28,7 @@ def cors_test(request):
     })
 
 
+@method_decorator(never_cache, name='dispatch')
 class VideoListView(generics.ListAPIView):
     queryset = Video.objects.all()
     serializer_class = VideoListSerializer

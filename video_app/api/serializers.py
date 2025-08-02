@@ -3,7 +3,7 @@ from video_app.models import Video
 
 
 class VideoListSerializer(serializers.ModelSerializer):
-    thumbnail_url = serializers.ReadOnlyField()
+    thumbnail_url = serializers.SerializerMethodField() 
 
     class Meta:
         model = Video
