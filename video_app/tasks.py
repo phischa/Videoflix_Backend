@@ -1,7 +1,29 @@
 import os
 import subprocess
+import logging
+import django_rq
 from django.conf import settings
 from .models import Video
+
+logger = logging.getLogger(__name__)
+
+def queue_video_processing(video_id):
+    """
+    Enqueue video processing job in Redis Queue
+    Call this from Views/Signals to start background processing
+    """
+    try:
+        queue = django_rq.get_queue('default')
+        job = queue.enqueue(
+            process_video_to_hls,
+            video_id,
+            job_timeout=1800
+        )
+        logger.info("Video %s queued for processing. Job ID: %s", video_id, job.id)
+        return job.id
+    except Exception as e:
+        logger.error("Failed to queue video %s for processing: %s", video_id, str(e))
+        raise
 
 def process_video_to_hls(video_id):
     """
@@ -10,7 +32,7 @@ def process_video_to_hls(video_id):
     try:
         video = Video.objects.get(id=video_id)
         video.processing_status = 'processing'
-        video.prosessing_progress = 0
+        video.processing_progress = 0
         video.save()
 
         # File paths
@@ -45,13 +67,17 @@ def process_video_to_hls(video_id):
         video.save()
 
     except Video.DoesNotExist:
-        print(f"Error: Video with ID {video_id} not found")
+        error_msg = f"Video with ID {video_id} not found"
+        logger.error(error_msg)
+        raise Exception(error_msg)
     except Exception as e:
+        error_msg = f"Error processing video {video_id}: {str(e)}"
+        logger.error(error_msg, exc_info=True)
         if video:
             video.processing_status = 'failed'
             video.processing_error = str(e)
             video.save()
-        print(f"Error processing video {video_id}: {str(e)}")
+        raise e
 
 
 def process_resolution(input_path, output_dir, resolution):
@@ -85,8 +111,14 @@ def process_resolution(input_path, output_dir, resolution):
         playlist_path                        # Output playlist
     ]
     
-    # Run FFmpeg
-    subprocess.run(ffmpeg_cmd, check=True, capture_output=True)
+    try:
+        # Run FFmpeg
+        result = subprocess.run(ffmpeg_cmd, check=True, capture_output=True, text=True)
+        logger.debug("FFmpeg conversion to %s completed successfully", res_name)
+    except subprocess.CalledProcessError as e:
+        logger.error("FFmpeg failed for resolution %s: %s", res_name, e.stderr)
+        raise
+
 
 
 def extract_video_metadata(video, input_path):
@@ -94,22 +126,32 @@ def extract_video_metadata(video, input_path):
     Extract video duration and file size using FFprobe
     """
     # Get video duration with ffprobe
-    duration_cmd = [
-        'ffprobe', 
-        '-v', 'quiet',
-        '-show_entries', 'format=duration',
-        '-of', 'csv=p=0',
-        input_path
-    ]
-    
-    result = subprocess.run(duration_cmd, capture_output=True, text=True)
-    duration = float(result.stdout.strip())
-    
-    # Get file size
-    file_size_bytes = os.path.getsize(input_path)
-    file_size_mb = file_size_bytes // (1024 * 1024)
-    
-    # Update video model
-    video.duration_seconds = int(duration)
-    video.file_size_mb = file_size_mb
-    video.save()
+    try:
+        duration_cmd = [
+            'ffprobe', 
+            '-v', 'quiet',
+            '-show_entries', 'format=duration',
+            '-of', 'csv=p=0',
+            input_path
+        ]
+        
+        result = subprocess.run(duration_cmd, capture_output=True, text=True, check=True)
+        duration = float(result.stdout.strip())
+        
+        # Get file size
+        file_size_bytes = os.path.getsize(input_path)
+        file_size_mb = file_size_bytes // (1024 * 1024)
+        
+        # Update video model
+        video.duration_seconds = int(duration)
+        video.file_size_mb = file_size_mb
+        video.save()
+        
+        logger.info("Metadata extracted for video %s: %ds, %dMB", 
+                    video.id, int(duration), file_size_mb)
+    except subprocess.CalledProcessError as e:
+        logger.error("FFprobe failed for video %s: %s", video.id, e.stderr)
+        raise
+    except Exception as e:
+        logger.error("Failed to extract metadata for video %s: %s", video.id, str(e))
+        raise
