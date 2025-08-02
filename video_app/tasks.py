@@ -8,14 +8,14 @@ def process_video_to_hls(video_id):
     Background job: Convert video to HLS with multiple resolutions
     """
     try:
-        video = Video.object.get(id=video_id)
+        video = Video.objects.get(id=video_id)
         video.processing_status = 'processing'
-        video.proseccing_progress = 0
+        video.prosessing_progress = 0
         video.save()
 
         # File paths
         input_path = video.original_file.path
-        output_dir = f"media/hls{video.id}/"
+        output_dir = f"media/hls/{video.id}/"
 
         # Create output directory
         os.makedirs(output_dir, exist_ok=True)
@@ -44,10 +44,14 @@ def process_video_to_hls(video_id):
         video.processing_status = 'completed'
         video.save()
 
+    except Video.DoesNotExist:
+        print(f"Error: Video with ID {video_id} not found")
     except Exception as e:
-        video.processing_status = 'failed'
-        video.processing_error = str(e)
-        video.save()
+        if video:
+            video.processing_status = 'failed'
+            video.processing_error = str(e)
+            video.save()
+        print(f"Error processing video {video_id}: {str(e)}")
 
 
 def process_resolution(input_path, output_dir, resolution):
