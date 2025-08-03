@@ -16,3 +16,4 @@ class VideoListSerializer(serializers.ModelSerializer):
             if request:
                 return request.build_absolute_uri(obj.thumbnail.url)
         return None
+        
