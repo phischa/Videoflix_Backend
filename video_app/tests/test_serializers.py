@@ -311,3 +311,4 @@ class TestVideoListSerializerValidation:
         # CharField entfernt automatisch leading/trailing whitespace
         assert validated_data['title'].strip() == 'Test Movie'
         assert validated_data['description'].strip() == 'A movie with leading/trailing spaces'
+        
