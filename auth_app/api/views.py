@@ -65,7 +65,7 @@ class LogoutView(APIView):
         
         if refresh_token is None:
             return Response(
-                {"detail": "Refresh token missing"}, 
+                {"detail": "Refresh token not found!"}, 
                 status=status.HTTP_400_BAD_REQUEST
             )
         

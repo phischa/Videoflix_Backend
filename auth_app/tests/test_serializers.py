@@ -196,19 +196,24 @@ class TestCustomTokenObtainPairSerializer:
         assert 'password' in serializer.fields
     
     def test_email_to_username_mapping(self, test_user):
-        """Test that email is mapped to username in validation"""
+        """Test that email is mapped correctly and tokens are generated."""
         valid_data = {
             'email': test_user.email,
             'password': 'testpass123'
         }
-        
+
         serializer = CustomTokenObtainPairSerializer(data=valid_data)
         assert serializer.is_valid()
-        
-        # After validation, username should be set
+
+        # After validation, tokens should be generated
         validated_data = serializer.validated_data
-        assert 'username' in validated_data
-        assert validated_data['username'] == test_user.username
+        assert 'access' in validated_data
+        assert 'refresh' in validated_data
+        
+        # User should be accessible via serializer.user
+        assert hasattr(serializer, 'user')
+        assert serializer.user.id == test_user.id
+        assert serializer.user.email == test_user.email
 
 
 @pytest.mark.django_db

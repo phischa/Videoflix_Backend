@@ -132,7 +132,7 @@ class TestLogoutView:
         response = api_client.post(url)
         
         assert response.status_code == status.HTTP_400_BAD_REQUEST
-        assert 'Refresh token not found' in response.data['detail']
+        assert 'Refresh token not found!' in response.data['detail']
         
     def test_logout_invalid_refresh_token(self, api_client):
         """Test logout with invalid refresh token."""
@@ -232,7 +232,7 @@ class TestCookieTokenRefreshView:
         response = api_client.post(url)
         
         assert response.status_code == status.HTTP_400_BAD_REQUEST
-        assert 'Refresh token missing' in response.data['detail']
+        assert 'Refresh token not found!' in response.data['detail']
         
     def test_token_refresh_invalid_token(self, api_client):
         """Test token refresh with invalid token."""
