@@ -1,6 +1,6 @@
 # Videoflix Backend API
 
-![Videoflix Logo](media/assets/logo_icon.svg)
+![Videoflix Logo](assets/logo_icon.svg)
 
 Dieses Projekt ist ein vollständiges **Django REST Framework Backend** für eine HLS-basierte Video-Streaming-Plattform. Es wurde entwickelt, um moderne Backend-Entwicklung mit **Django**, **PostgreSQL**, **Redis** und **Docker** zu demonstrieren.
 
