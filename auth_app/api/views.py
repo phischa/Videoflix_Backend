@@ -42,7 +42,7 @@ class RegistrationView(APIView):
 
         if serializer.is_valid():
             saved_account = serializer.save()
-            email_sent = send_activation_email(saved_account, request)
+            token = send_activation_email(saved_account, request)
             
             data = {
                 "user": {
