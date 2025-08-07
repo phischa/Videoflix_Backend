@@ -28,17 +28,34 @@ except ImportError as e:
     raise
 
 try:
-    # Email Service imports
+    # Email Service imports - korrigiert für neue email_service.py
     from .email_service import (
+        # Classes
         ActivationEmailService,
         PasswordResetEmailService,
+        EmailServiceFactory,
+        
+        # Main functions
         send_activation_email,
-        resend_activation_email,
-        queue_activation_email,
-        is_email_valid_format,
-        get_email_stats,
         send_password_reset_email,
+        resend_activation_email,
+        
+        # Utility functions  
+        health_check_email,
+        validate_email_config,
     )
+    
+    # Legacy functions - falls sie noch irgendwo verwendet werden
+    # Diese können wir optional hinzufügen falls sie in der email_service existieren
+    try:
+        from .email_service import (
+            is_email_valid_format,
+            get_email_stats,
+        )
+    except ImportError:
+        # Falls diese Funktionen nicht existieren, ignorieren wir sie
+        pass
+        
 except ImportError as e:
     print(f"Error importing email_service: {e}")
     raise
@@ -57,13 +74,17 @@ __all__ = [
     'create_password_confirm_url',
     'reset_user_password',
     
-    # Email Service
+    # Email Service - Classes
     'ActivationEmailService',
     'PasswordResetEmailService',
+    'EmailServiceFactory',
+    
+    # Email Service - Main Functions
     'send_activation_email',
-    'resend_activation_email',
-    'queue_activation_email',
-    'is_email_valid_format',
-    'get_email_stats',
     'send_password_reset_email',
+    'resend_activation_email',
+    
+    # Email Service - Utilities
+    'health_check_email',
+    'validate_email_config',
 ]

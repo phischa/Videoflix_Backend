@@ -1,8 +1,9 @@
 import logging
+import os
 from .models import Video
 from .tasks import queue_video_processing
 from django.dispatch import receiver
-from django.db.models.signals import post_save
+from django.db.models.signals import post_save, post_delete
 
 logger = logging.getLogger(__name__)
 
@@ -11,9 +12,6 @@ def video_post_save(sender, instance, created, **kwargs):
     """
     Signal: Auto-queue video for HLS processing when uploaded
     """
-    logger.debug("Video post_save signal received for video %s: %s", 
-                instance.id, instance.title)
-    
     if created and instance.original_file:
         logger.info("New Video created with file: %s (ID: %s). Starting background processing", 
                     instance.title, instance.id)
@@ -37,3 +35,13 @@ def video_post_save(sender, instance, created, **kwargs):
     else:
         logger.debug("Existing Video updated: %s (ID: %s)", 
                     instance.title, instance.id)
+
+@receiver(post_delete, sender=Video)
+def auto_delete_file_on_delete(sender, instance, **kwargs):
+    """
+    Deletes file from filesystem
+    when corresponding `Video` object is deleted.
+    """
+    if instance.original_file:
+        if os.path.isfile(instance.original_file.path):
+            os.remove(instance.original_file.path)
