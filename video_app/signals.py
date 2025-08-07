@@ -39,9 +39,51 @@ def video_post_save(sender, instance, created, **kwargs):
 @receiver(post_delete, sender=Video)
 def auto_delete_file_on_delete(sender, instance, **kwargs):
     """
-    Deletes file from filesystem
-    when corresponding `Video` object is deleted.
+    Deletes all files from filesystem when Video object is deleted:
+    - Original video file
+    - Complete HLS directory with all resolutions and segments
+    - Thumbnail image
     """
+    logger.info("Deleting files for video: %s (ID: %s)", instance.title, instance.id)
+    
+    # 1. Delete original video file
     if instance.original_file:
-        if os.path.isfile(instance.original_file.path):
-            os.remove(instance.original_file.path)
+        try:
+            if os.path.isfile(instance.original_file.path):
+                os.remove(instance.original_file.path)
+                logger.info("Original file deleted: %s", instance.original_file.path)
+        except Exception as e:
+            logger.error("Failed to delete original file %s: %s", 
+                        instance.original_file.path, str(e))
+    
+    # 2. Delete complete HLS directory (all resolutions and segments)
+    if instance.hls_directory:
+        try:
+            if os.path.exists(instance.hls_directory):
+                shutil.rmtree(instance.hls_directory)
+                logger.info("HLS directory deleted: %s", instance.hls_directory)
+        except Exception as e:
+            logger.error("Failed to delete HLS directory %s: %s", 
+                        instance.hls_directory, str(e))
+    else:
+        # Fallback: Try to delete using standard path pattern
+        hls_fallback_path = f"media/hls/{instance.id}/"
+        try:
+            if os.path.exists(hls_fallback_path):
+                shutil.rmtree(hls_fallback_path)
+                logger.info("HLS directory deleted (fallback): %s", hls_fallback_path)
+        except Exception as e:
+            logger.error("Failed to delete HLS directory (fallback) %s: %s", 
+                        hls_fallback_path, str(e))
+    
+    # 3. Delete thumbnail
+    if instance.thumbnail:
+        try:
+            if os.path.isfile(instance.thumbnail.path):
+                os.remove(instance.thumbnail.path)
+                logger.info("Thumbnail deleted: %s", instance.thumbnail.path)
+        except Exception as e:
+            logger.error("Failed to delete thumbnail %s: %s", 
+                        instance.thumbnail.path, str(e))
+    
+    logger.info("File deletion completed for video: %s (ID: %s)", instance.title, instance.id)

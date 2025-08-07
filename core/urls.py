@@ -19,13 +19,14 @@ from django.urls import path, include
 from video_app.api import urls as video_app_urls
 from django.conf import settings
 from django.conf.urls.static import static
+from debug_toolbar.toolbar import debug_toolbar_urls
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include(video_app_urls)),
 ]
 
-if settings.DEBUG:
+if not settings.PRODUCTION:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 
