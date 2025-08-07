@@ -29,6 +29,7 @@ SECRET_KEY = os.getenv('SECRET_KEY', default='django-insecure-@#x5h3zj!g+8g1v@2^
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv('DEBUG', 'True').lower() in ('true', '1', 'yes')
+PRODUCTION=False
 
 ALLOWED_HOSTS = os.environ.get(
     "ALLOWED_HOSTS", 
@@ -169,8 +170,8 @@ else:
     EMAIL_USE_SSL = os.getenv('EMAIL_USE_SSL', 'False').lower() == 'true'
     DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', EMAIL_HOST_USER)
 
-if not DEBUG:
-    # Production:
+if not DEBUG and os.getenv('PRODUCTION', 'False').lower() == 'true':
+    # Production HTTPS Settings
     SECURE_SSL_REDIRECT = True
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True

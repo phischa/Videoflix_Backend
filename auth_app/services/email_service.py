@@ -317,12 +317,12 @@ Das {company_name} Team
             
             if success:
                 self.logger.info(f"Activation email sent successfully to {user.email} (User ID: {user.id})")
-            
-            return success
+                return token
             
         except Exception as e:
             self.logger.error(f"Error sending activation email to {user.email}: {e}")
-            return False
+        
+        return None
     
     def _get_activation_context(self, user: User, activation_url: str) -> Dict[str, Any]:
         """

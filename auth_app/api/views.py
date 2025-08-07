@@ -49,8 +49,7 @@ class RegistrationView(APIView):
                     "id": saved_account.pk,
                     "email": saved_account.email
                 },
-                "message": "Account created. Activation email sent." if email_sent else "Account created. Please contact support.",
-                "email_sent": email_sent
+                "token": token 
             }
             return Response(data, status=status.HTTP_201_CREATED)
         else:
