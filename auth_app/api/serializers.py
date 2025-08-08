@@ -4,6 +4,11 @@ from django.contrib.auth.models import User
     
 
 class RegistrationSerializer(serializers.ModelSerializer):
+    """
+    Serializer for user registration with email and password confirmation.
+    
+    Creates inactive users that require email activation.
+    """
     confirmed_password = serializers.CharField(write_only=True)
 
     class Meta:
@@ -19,17 +24,20 @@ class RegistrationSerializer(serializers.ModelSerializer):
         }
 
     def validate_confirmed_password(self, value):
+        """Validates that confirmed password matches the main password."""
         password = self.initial_data.get('password')
         if password and value and password != value:
             raise serializers.ValidationError('Passwords do not match')
         return value
 
     def validate_email(self, value):
+        """Validates that email is unique."""
         if User.objects.filter(email=value).exists():
             raise serializers.ValidationError('Email already exists')
         return value
 
     def save(self):
+        """Creates new inactive user account with email as username."""
         pw = self.validated_data['password']
         email = self.validated_data['email']
 
@@ -47,16 +55,27 @@ class RegistrationSerializer(serializers.ModelSerializer):
 
 
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
+    """
+    Custom token serializer for email-based login instead of username.
+    
+    Validates account activation status before issuing tokens.
+    """
     email = serializers.EmailField()
     password = serializers.CharField(write_only=True)
 
     def __init__(self, *args, **kwargs):   
+        """Removes username field since we use email for authentication."""
         super().__init__(*args, **kwargs)   
 
         if "username" in self.fields:
             self.fields.pop("username")
 
     def validate(self, attrs):
+        """
+        Validates login credentials and account activation status.
+        
+        Returns JWT tokens for valid, active accounts.
+        """
         email = attrs.get("email")
         password = attrs.get("password")
 
@@ -97,7 +116,6 @@ class PasswordResetSerializer(serializers.Serializer):
         # Store the user for later use if exists (but don't reveal if not)
         try:
             user = User.objects.get(email=value)
-            # Store user in instance for later access
             self.user = user
         except User.DoesNotExist:
             self.user = None
@@ -121,14 +139,11 @@ class PasswordConfirmSerializer(serializers.Serializer):
     )
 
     def validate_new_password(self, value):
-        """
-        Validate new password using Django's built-in validators
-        """
+        """Validate new password using Django's built-in validators"""
         from django.contrib.auth.password_validation import validate_password
         from django.core.exceptions import ValidationError as DjangoValidationError
         
         try:
-            # Use Django's built-in password validators
             validate_password(value)
         except DjangoValidationError as e:
             raise serializers.ValidationError(list(e.messages))
@@ -136,18 +151,14 @@ class PasswordConfirmSerializer(serializers.Serializer):
         return value
 
     def validate_confirm_password(self, value):
-        """
-        Validate password confirmation matches new password
-        """
+        """Validate password confirmation matches new password"""
         new_password = self.initial_data.get('new_password')
         if new_password and value and new_password != value:
             raise serializers.ValidationError('Passwords do not match')
         return value
 
     def validate(self, attrs):
-        """
-        Cross-field validation to ensure passwords match
-        """
+        """Cross-field validation to ensure passwords match"""
         new_password = attrs.get('new_password')
         confirm_password = attrs.get('confirm_password')
         
