@@ -30,6 +30,12 @@ def cors_test(request):
 
 @method_decorator(never_cache, name='dispatch')
 class VideoListView(generics.ListAPIView):
+    """
+    API view for listing all available videos.
+    
+    Returns list of videos with basic information for authenticated users.
+    Uses cookie-based JWT authentication and disables caching.
+    """
     queryset = Video.objects.all()
     serializer_class = VideoListSerializer
     authentication_classes = [CookieJWTAuthentication]  
@@ -42,6 +48,7 @@ class VideoListView(generics.ListAPIView):
         return context
 
     def dispatch(self, request, *args, **kwargs):
+        """Request dispatcher with debug logging."""
         print(f"DEBUG: Request to VideoListView")
         print(f"DEBUG: Authentication classes: {self.authentication_classes}")
         print(f"DEBUG: Cookies in request: {list(request.COOKIES.keys())}")
@@ -49,10 +56,26 @@ class VideoListView(generics.ListAPIView):
     
 
 class HLSManifestView(APIView):
+    """
+    API view for serving HLS manifest files (.m3u8).
+    
+    Provides HLS playlist files for video streaming in different resolutions.
+    Validates video existence, resolution, and file availability.
+    """
     authentication_classes = [CookieJWTAuthentication]
     permission_classes = [IsAuthenticated]
     
     def get(self, request, movie_id, resolution):
+        """
+        Serves HLS manifest file for specific video and resolution.
+        
+        Args:
+            movie_id: ID of the requested video
+            resolution: Video resolution (360p, 480p, 720p, 1080p)
+            
+        Returns:
+            HttpResponse: Manifest file with proper content type
+        """
         try:
             video = Video.objects.get(id=movie_id)
         except Video.DoesNotExist:
@@ -82,10 +105,27 @@ class HLSManifestView(APIView):
     
 
 class HLSSegmentView(APIView):
+    """
+    API view for serving HLS video segments (.ts files).
+    
+    Provides individual video segments for HLS streaming.
+    Validates video, resolution, and segment name format.
+    """
     authentication_classes = [CookieJWTAuthentication]
     permission_classes = [IsAuthenticated]
     
     def get(self, request, movie_id, resolution, segment):
+        """
+        Serves HLS video segment for specific video.
+        
+        Args:
+            movie_id: ID of the requested video
+            resolution: Video resolution 
+            segment: Segment filename (e.g., 000.ts, index1.ts)
+            
+        Returns:
+            HttpResponse: Video segment with proper content type
+        """
         try:
             video = Video.objects.get(id=movie_id)
         except Video.DoesNotExist:
@@ -114,3 +154,4 @@ class HLSSegmentView(APIView):
             segment_content,
             content_type='video/MP2T'
         )
+        
