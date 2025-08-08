@@ -3,9 +3,16 @@ from video_app.models import Video
 
 
 class VideoListSerializer(serializers.ModelSerializer):
+    """
+    Serializer for video list API.
+    
+    Provides basic video information with absolute thumbnail URLs
+    for displaying videos in list views.
+    """
     thumbnail_url = serializers.SerializerMethodField() 
 
     class Meta:
+        """Meta configuration for VideoListSerializer."""
         model = Video
         fields = ['id', 'created_at', 'title', 'description', 'thumbnail_url', 'category']
 
