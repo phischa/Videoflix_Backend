@@ -25,6 +25,13 @@ PROCESSING_STATUS_CHOICES = [
 
 
 class Video(models.Model):
+    """
+    Video model for HLS streaming platform.
+    
+    Manages video metadata, upload files, processing status 
+    and HLS streaming information.
+    """
+    
     title = models.CharField(max_length=100, db_index=True)
     description = models.TextField(blank=True)
     category = models.CharField(max_length=20, choices=GENRE_CHOICES, db_index=True)
@@ -37,7 +44,7 @@ class Video(models.Model):
             FileExtensionValidator(allowed_extensions=['mp4', 'mov', 'avi', 'wmv', 'asf']),
             validate_file_size
         ],
-        null=True, blank=True, #nach Migration entfernen
+        #null=True, blank=True, #nach Migration entfernen
         help_text="Original video file for processing (Max: 10GB)"
     )
     processing_status = models.CharField(
@@ -77,12 +84,14 @@ class Video(models.Model):
     )
 
     class Meta:
+        """Meta options for Video model."""
         ordering = ['-created_at']
         indexes = [
             models.Index(fields=['category', 'created_at']),
         ]
 
     def __str__(self):
+        """String representation of Video object."""
         return f"{self.title} ({self.get_category_display()})"
 
     @property
