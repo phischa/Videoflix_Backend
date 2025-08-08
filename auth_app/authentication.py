@@ -3,8 +3,26 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 
 logger = logging.getLogger(__name__)
 
+
 class CookieJWTAuthentication(JWTAuthentication):
+    """
+    Custom JWT Authentication that reads tokens from cookies.
+    
+    Extends SimpleJWT's JWTAuthentication to support cookie-based tokens.
+    Allows frontend applications to use JWT tokens via HttpOnly cookies
+    instead of Authorization headers.
+    """
+    
     def get_raw_token(self, request):
+        """
+        Extracts JWT token from request header or cookie.
+        
+        Args:
+            request (HttpRequest): Django HTTP request object
+            
+        Returns:
+            str|None: JWT token string or None if not found
+        """
         logger.error("DEBUG: CookieJWTAuthentication.get_raw_token() called")
         
         # Header prüfen - MANUELL (umgehe super())
@@ -23,6 +41,15 @@ class CookieJWTAuthentication(JWTAuthentication):
         return cookie_token
     
     def authenticate(self, request):
+        """
+        Authenticates request based on JWT token.
+        
+        Args:
+            request (HttpRequest): Django HTTP request object
+            
+        Returns:
+            tuple|None: (User, Token) on successful authentication or None
+        """
         logger.error("DEBUG: CookieJWTAuthentication.authenticate() called")
         
         raw_token = self.get_raw_token(request)
