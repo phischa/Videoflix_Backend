@@ -28,16 +28,24 @@ logger = logging.getLogger(__name__)
 
 
 class HelloWorldView(APIView):
+    """Test endpoint for authenticated requests."""
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
+        """Returns hello world message for authenticated users."""
         return Response({'message': 'Hello World!'})
 
 
 class RegistrationView(APIView):
+    """Handles user registration with email activation."""
     permission_classes = [AllowAny]
 
     def post(self, request):
+        """
+        Creates new user account and sends activation email.
+        
+        Returns user data and activation token on successful registration.
+        """
         serializer = RegistrationSerializer(data=request.data)
 
         if serializer.is_valid():
@@ -57,9 +65,15 @@ class RegistrationView(APIView):
 
 
 class LogoutView(APIView):
+    """Handles user logout by blacklisting refresh tokens and clearing cookies."""
     permission_classes = [AllowAny]
 
     def post(self, request, *args, **kwargs):
+        """
+        Logs out user by blacklisting refresh token and deleting cookies.
+        
+        Requires refresh token in cookies for secure logout.
+        """
         refresh_token = request.COOKIES.get("refresh_token")
         
         if refresh_token is None:
@@ -89,9 +103,15 @@ class LogoutView(APIView):
 
 
 class CookieTokenObtainPairView(TokenObtainPairView):
+    """Custom login view that sets JWT tokens as HttpOnly cookies."""
     serializer_class = CustomTokenObtainPairSerializer
 
     def post(self, request, *args, **kwargs):
+        """
+        Authenticates user and sets JWT tokens as HttpOnly cookies.
+        
+        Returns user information and sets access/refresh tokens as cookies.
+        """
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
@@ -129,7 +149,14 @@ class CookieTokenObtainPairView(TokenObtainPairView):
     
 
 class CookieTokenRefreshView(TokenRefreshView):
+    """Refreshes JWT access tokens using refresh token from cookies."""
+
     def post(self, request, *args, **kwargs):
+        """
+        Refreshes access token using refresh token from cookie.
+        
+        Returns new access token as cookie and optionally new refresh token.
+        """
         refresh_token = request.COOKIES.get("refresh_token")
 
         if refresh_token is None:
@@ -175,6 +202,7 @@ class CookieTokenRefreshView(TokenRefreshView):
 
         return response
 
+
 class AccountActivationView(APIView):
     """
     Handles account activation via email token
@@ -183,7 +211,11 @@ class AccountActivationView(APIView):
     permission_classes = [AllowAny]
 
     def get(self, request, uidb64, token):
-        # Verify activation token
+        """
+        Activates user account based on email activation token.
+        
+        Validates token and sets account status to active.
+        """
         user = verify_activation_token(uidb64, token)
         
         if not user:
@@ -191,7 +223,6 @@ class AccountActivationView(APIView):
                 "detail": "Invalid or expired activation link"
             }, status=status.HTTP_400_BAD_REQUEST)
         
-        # Activate user if not already active
         if not user.is_active:
             success = activate_user(user)
             if success:
@@ -216,13 +247,15 @@ class PasswordResetView(APIView):
     permission_classes = [AllowAny]
 
     def post(self, request):
+        """
+        Sends password reset email to registered users.
+        
+        Always returns success message for security (doesn't reveal if email exists).
+        """
         serializer = PasswordResetSerializer(data=request.data)
         
         if serializer.is_valid():
-            # Check if user exists (stored in serializer during validation)
             if hasattr(serializer, 'user') and serializer.user:
-                # User exists - send password reset email
-                
                 try:
                     email_sent = send_password_reset_email(serializer.user, request)
                     
@@ -233,9 +266,7 @@ class PasswordResetView(APIView):
                         
                 except Exception as e:
                     logger.error(f"Error sending password reset email: {e}")
-            
-            # ALWAYS return same success message for security
-            # (Don't reveal if user exists or not)
+
             return Response({
                 "detail": "An email has been sent to reset your password."
             }, status=status.HTTP_200_OK)
@@ -252,7 +283,11 @@ class PasswordConfirmView(APIView):
     permission_classes = [AllowAny]
 
     def post(self, request, uidb64, token):
-        # Validate the reset token first
+        """
+        Sets new password based on valid reset token.
+        
+        Validates token and updates user password.
+        """
         user = verify_password_reset_token(uidb64, token)
         
         if not user:
@@ -260,13 +295,11 @@ class PasswordConfirmView(APIView):
                 "detail": "Invalid or expired password reset link"
             }, status=status.HTTP_400_BAD_REQUEST)
         
-        # Validate the new password
         serializer = PasswordConfirmSerializer(data=request.data)
         
         if serializer.is_valid():
             new_password = serializer.validated_data['new_password']
             
-            # Reset the password using token service
             success = reset_user_password(user, new_password)
             
             if success:
