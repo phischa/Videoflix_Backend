@@ -46,13 +46,6 @@ class VideoListView(generics.ListAPIView):
         context = super().get_serializer_context()
         context['request'] = self.request
         return context
-
-    def dispatch(self, request, *args, **kwargs):
-        """Request dispatcher with debug logging."""
-        print(f"DEBUG: Request to VideoListView")
-        print(f"DEBUG: Authentication classes: {self.authentication_classes}")
-        print(f"DEBUG: Cookies in request: {list(request.COOKIES.keys())}")
-        return super().dispatch(request, *args, **kwargs)
     
 
 class HLSManifestView(APIView):
