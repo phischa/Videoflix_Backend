@@ -18,3 +18,4 @@ class VideoAppConfig(AppConfig):
         Imports signal handlers for video processing automation.
         """
         import video_app.signals
+        

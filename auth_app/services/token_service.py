@@ -330,3 +330,4 @@ def create_password_confirm_url(uidb64: str, token: str, request=None) -> str:
 def reset_user_password(user: User, new_password: str) -> bool:
     """Shortcut for password reset"""
     return PasswordResetTokenService.reset_user_password(user, new_password)
+    

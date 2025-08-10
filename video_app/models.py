@@ -44,7 +44,6 @@ class Video(models.Model):
             FileExtensionValidator(allowed_extensions=['mp4', 'mov', 'avi', 'wmv', 'asf']),
             validate_file_size
         ],
-        #null=True, blank=True, #nach Migration entfernen
         help_text="Original video file for processing (Max: 10GB)"
     )
     processing_status = models.CharField(
@@ -100,3 +99,4 @@ class Video(models.Model):
         if self.thumbnail:
             return self.thumbnail.url
         return None
+        

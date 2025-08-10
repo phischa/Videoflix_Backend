@@ -9,13 +9,15 @@ Dieses Projekt ist ein vollständiges **Django REST Framework Backend** für ein
 ## Technologie-Stack
 
 - **Django 5.2.4** - Web Framework
-- **Django REST Framework** - API Development
-- **PostgreSQL** - Hauptdatenbank
-- **Redis** - Caching & Task Queue
-- **Django RQ** - Background Task Processing
+- **Django REST Framework 3.16.0** - API Development
+- **PostgreSQL 17** - Hauptdatenbank
+- **Redis Latest** - Caching & Task Queue
+- **Django RQ 3.0.1** - Background Task Processing
 - **JWT Authentication** - Cookie-basierte Authentifizierung
 - **Docker & Docker Compose** - Containerisierung
-- **pytest** - Testing Framework mit 88%+ Coverage
+- **pytest 8.4.1** - Testing Framework
+- **FFmpeg** - Video Processing für HLS
+- **Python 3.12-Alpine** - Runtime Environment
 
 ---
 
@@ -38,12 +40,53 @@ cd videoflix-backend
 
 ### 2. Environment-Variablen einrichten
 ```bash
-# Die env.templates Datei als Vorlage verwenden
-cp env.templates .env
+# .env Datei aus Template erstellen
+cp .env.template .env
 
 # .env Datei nach Bedarf anpassen
-# Alle nötigen Variablen sind bereits in env.templates vordefiniert
+nano .env  # oder mit VS Code bearbeiten
 ```
+
+**Environment-Variablen aus .env.template:**
+```env
+# Django Superuser (wird automatisch erstellt)
+DJANGO_SUPERUSER_USERNAME=admin
+DJANGO_SUPERUSER_PASSWORD=adminpassword
+DJANGO_SUPERUSER_EMAIL=admin@example.com
+
+# Django Settings
+SECRET_KEY="django-insecure-lp6h18zq4@z30symy*oz)+hp^uoti48r_ix^qc-m@&yfxd7&hn"
+DEBUG=True
+ALLOWED_HOSTS=localhost,127.0.0.1
+CSRF_TRUSTED_ORIGINS=http://localhost:4200,http://127.0.0.1:4200
+
+# Database Configuration
+DB_NAME=your_database_name
+DB_USER=your_database_user
+DB_PASSWORD=your_database_password
+DB_HOST=db
+DB_PORT=5432
+
+# Redis Configuration
+REDIS_HOST=redis
+REDIS_LOCATION=redis://redis:6379/1
+REDIS_PORT=6379
+REDIS_DB=0
+
+# Email Configuration
+EMAIL_HOST=smtp.example.com
+EMAIL_PORT=587
+EMAIL_HOST_USER=your_email_user
+EMAIL_HOST_PASSWORD=your_email_user_password
+EMAIL_USE_TLS=True
+EMAIL_USE_SSL=False
+DEFAULT_FROM_EMAIL=default_from_email
+```
+
+**Wichtige Anpassungen für die Entwicklung:**
+- Ersetze `your_database_*` mit deinen gewünschten DB-Credentials
+- Konfiguriere Email-Settings für dein SMTP-Provider.
+- Für Production: Ändere `SECRET_KEY`, `DEBUG=False `, `PRODUCTION=True`
 
 ### 3. Docker Container starten
 ```bash
@@ -54,17 +97,19 @@ docker-compose up --build
 docker-compose up -d --build
 ```
 
-### 4. Datenbank migrieren
-```bash
-# In den Web-Container einloggen
-docker-compose exec web /bin/sh
+Das System startet automatisch:
+- **PostgreSQL** auf `videoflix_database` Container
+- **Redis** auf `videoflix_redis` Container  
+- **Django Backend** auf `videoflix_backend` Container (Port 8000)
+- **RQ Worker** für Video-Processing (läuft im Backend-Container)
 
-# Migrationen ausführen
-python manage.py migrate
-
-# Superuser erstellen (optional)
-python manage.py createsuperuser
-```
+### 4. Automatische Setup-Schritte
+Das `backend.entrypoint.sh` Script führt automatisch aus:
+- Warten auf PostgreSQL-Verfügbarkeit
+- Static Files sammeln
+- Datenbank-Migrationen erstellen und ausführen
+- Superuser erstellen (basierend auf Environment-Variablen)
+- RQ Worker für Background Tasks starten
 
 ---
 
@@ -83,25 +128,58 @@ Das Backend läuft standardmäßig auf `http://localhost:8000`
 - `POST /api/password_reset/` - Password Reset anfordern
 - `POST /api/password_confirm/<uidb64>/<token>/` - Password zurücksetzen
 
-#### **Video Streaming**
-- `GET /api/video/` - Video-Liste
-- `GET /api/video/<id>/<resolution>/index.m3u8` - HLS Manifest
-- `GET /api/video/<id>/<resolution>/<segment>/` - HLS Video-Segmente
+#### **Video List and HLS Streaming**
+- `GET /api/videos/` - Video-Liste (mit Category-Filter)
+- `GET /api/videos/<id>/<resolution>/index.m3u8` - HLS Manifest
+- `GET /api/videos/<id>/<resolution>/<segment>` - HLS Video-Segmente
+
+**Unterstützte Auflösungen:** `360p`, `480p`, `720p`, `1080p`
 
 ### **Admin Interface**
-Verfügbar unter `http://localhost:8000/admin/` (nach Superuser-Erstellung)
+Verfügbar unter `http://localhost:8000/admin/`
+- **Username:** `admin` (oder aus ENV)
+- **Password:** `adminpassword` (oder aus ENV)
 
-### **API Dokumentation**
-Die vollständige API-Dokumentation findest du in `docs/api-documentation.pdf`
+### **RQ Dashboard**
+Django-RQ Dashboard verfügbar unter `http://localhost:8000/django-rq/`
+
+---
+
+## Video Processing
+
+Das System konvertiert hochgeladene Videos automatisch zu HLS-Format:
+
+1. **Upload** - Video wird hochgeladen und `processing_status='pending'` gesetzt
+2. **Background Processing** - RQ Worker konvertiert Video zu 4 Auflösungen
+3. **HLS Output** - Segmente und Playlists werden in `media/hls/{video_id}/` gespeichert
+4. **Streaming** - Videos können über HLS-Endpoints gestreamt werden
+
+**Unterstützte Video-Formate:** `mp4`, `mov`, `avi`, `wmv`, `asf`  
+**Max. Dateigröße:** 10GB
 
 ---
 
 ## Entwicklung
 
+### **Container-Befehle**
+```bash
+# In Backend-Container einloggen
+docker exec -it videoflix_backend sh
+
+# Backend-Logs anzeigen
+docker-compose logs -f web
+
+# Alle Logs anzeigen
+docker-compose logs -f
+
+# Container neustarten
+docker-compose restart web
+```
+
 ### **Tests ausführen**
 ```bash
 # In den Container einloggen
-docker-compose exec web /bin/sh
+docker-compose exec web sh
 
 # Alle Tests ausführen
 pytest
@@ -114,107 +192,87 @@ pytest auth_app/tests/
 
 # Nur video_app Tests  
 pytest video_app/tests/
+
+# Oder direkt ohne Container-Login:
+docker-compose exec web pytest
 ```
 
-### **Datenbank zurücksetzen**
+### **Video Management Commands**
 ```bash
-# Container stoppen
-docker-compose down
+# Liste aller Videos anzeigen
+docker exec -it videoflix_backend python manage.py list_videos
 
-# Volumes löschen (ACHTUNG: Alle Daten gehen verloren!)
+# Video manuell verarbeiten (synchron für Tests)
+docker exec -it videoflix_backend python manage.py process_video <video_id> --sync
+
+# Fehlgeschlagene Videos bereinigen
+docker exec -it videoflix_backend python manage.py cleanup_failed --delete-files
+```
+
+### **Datenbank-Operationen**
+```bash
+# Migrationen erstellen
+docker exec -it videoflix_backend python manage.py makemigrations
+
+# Migrationen anwenden
+docker exec -it videoflix_backend python manage.py migrate
+
+# Django Shell öffnen
+docker exec -it videoflix_backend python manage.py shell
+
+# Datenbank zurücksetzen (ACHTUNG: Datenverlust!)
 docker-compose down -v
-
-# Neu starten
 docker-compose up --build
-```
-
-### **Logs anzeigen**
-```bash
-# Alle Services
-docker-compose logs
-
-# Nur Web-Service
-docker-compose logs web
-
-# Live Logs
-docker-compose logs -f web
-```
-
----
-
-## Projektstruktur
-
-```
-videoflix-backend/
-├── auth_app/                 # Authentifizierung & User Management
-│   ├── api/                  # API Views, Serializers, URLs
-│   ├── services/             # Email & Token Services
-│   ├── tests/                # 88%+ Test Coverage
-│   └── authentication.py    # Custom JWT Cookie Authentication
-├── video_app/                # Video Management & HLS Streaming
-│   ├── api/                  # Video API Endpoints
-│   ├── models.py             # Video Model
-│   ├── services/             # Video Processing Services
-│   └── tests/                # Comprehensive Tests
-├── core/                     # Django Settings & Main Config
-├── templates/                # Email Templates
-├── static/                   # Static Files
-├── media/                    # User Uploads & HLS Files
-├── docker-compose.yml        # Docker Services Configuration
-├── Dockerfile               # Web Container Configuration
-├── requirements.txt         # Python Dependencies
-├── env.templates            # Environment Variables Template
-└── pytest.ini              # Test Configuration
 ```
 
 ---
 
 ## Features
 
-### **🔐 Authentifizierung**
+### 🔐 **Authentifizierung**
 - Cookie-basierte JWT-Authentifizierung
-- Email-Aktivierung mit Templates
+- Email-Aktivierung mit HTML Templates
 - Password Reset Funktionalität
-- Sichere Token-Rotation
+- Sichere Token-Rotation mit Blacklisting
+- CORS-Konfiguration für Frontend-Integration
 
-### **🎥 Video Streaming**
+### 🎥 **Video Streaming**
 - HLS (HTTP Live Streaming) Support
-- Multi-Resolution Video Delivery
-- Authenticierte Video-Segmente
-- Efficient File Serving
+- Multi-Resolution Video Delivery (360p bis 1080p)
+- Authentifizierte Video-Segmente
+- Efficient File Serving mit StreamingHttpResponse
 
-### **📧 Email System**
-- HTML Email Templates
-- Activation & Password Reset Emails
+### 📧 **Email System**
+- HTML Email Templates für Aktivierung & Password Reset
 - Development & Production Email Backends
-- Queue-basierte Email Verarbeitung
+- Konfigurierbare SMTP-Settings
+- Template-basierte Email-Generation
 
-### **🧪 Testing**
-- **88%+ Test Coverage**
+### 🔄 **Background Processing**
+- Django-RQ für Video-Konvertierung
+- FFmpeg-Integration für HLS-Processing
+- Progress-Tracking für Video-Verarbeitung
+- Error-Handling und Retry-Mechanismen
+
+### 🐳 **Docker Integration**
+- Multi-Container Setup (PostgreSQL, Redis, Django)
+- Alpine-based Images für geringe Container-Größe
+
+### 🧪 **Testing & Quality**
 - pytest mit Django Integration
-- Fixtures für realistische Test-Daten
-- Mock-basierte Service Tests
-
-### **🐳 Docker Integration**
-- Multi-Container Setup
-- PostgreSQL & Redis Services
-- Development & Production Ready
-- Volume Persistence
+- Code Coverage Tracking
 
 ---
 
-## Ziel des Projekts
+## API Dokumentation
 
-Dieses Backend wurde entwickelt, um folgende **moderne Backend-Konzepte** zu demonstrieren:
-
-- **RESTful API Design** mit Django REST Framework
-- **Microservices-ähnliche Architektur** mit separaten Apps
-- **Cookie-basierte JWT-Authentifizierung** für Web-Sicherheit
-- **Video-Streaming-Technologien** mit HLS
-- **Containerisierung** mit Docker
-- **Test-Driven Development** mit hoher Coverage
-- **Email-Integration** für User-Onboarding
-- **Background Task Processing** mit Redis Queue
+### **Authentication und Streaming Flow**
+1. **Register** → Email-Bestätigung erforderlich
+2. **Activate** → Account via Email-Link aktivieren  
+3. **Login** → JWT-Cookies werden gesetzt
+4. **Access** → Authentifizierte API-Requests
+5. **Streaming** → HLS-Playback über authentifizierte Endpoints
+6. **Logout** → Token-Blacklisting
 
 ---
 
@@ -224,29 +282,48 @@ Dieses Backend wurde entwickelt, um folgende **moderne Backend-Konzepte** zu dem
 ```bash
 # Production Environment Variables setzen
 export DEBUG=False
-export DATABASE_URL=your_production_db
-export REDIS_URL=your_production_redis
+export SECRET_KEY=your-production-secret
+export DB_PASSWORD=secure-production-password
+export EMAIL_HOST_USER=production-email@domain.com
 
-# Mit Production Settings starten
-docker-compose -f docker-compose.prod.yml up --build
+# SSL/HTTPS Settings werden automatisch aktiviert
+export PRODUCTION=True
 ```
 
-### **Environment Variables**
-- `DEBUG` - Django Debug Mode
-- `SECRET_KEY` - Django Secret Key
-- `DATABASE_URL` - PostgreSQL Connection String
-- `REDIS_URL` - Redis Connection String
-- `EMAIL_HOST_USER` - SMTP Email Configuration
-- `FRONTEND_URL` - Frontend URL for CORS
+---
+
+## Troubleshooting
+
+### **Häufige Probleme**
+
+#### Container startet nicht
+```bash
+# Logs prüfen
+docker-compose logs web
+
+# Container Status prüfen
+docker ps -a
+
+# Ports prüfen
+netstat -tulpn | grep :8000
+```
+
+#### Video Processing hängt
+```bash
+# RQ Worker Status prüfen
+docker exec -it videoflix_backend python manage.py rq info
+
+# Failed Jobs anzeigen
+docker exec -it videoflix_backend python manage.py cleanup_failed
+```
 
 ---
 
 ## Support & Dokumentation
 
-- **API Dokumentation**: `docs/api-documentation.pdf`
-- **Code Coverage Report**: Nach Test-Ausführung in `htmlcov/index.html`
-- **Django Admin**: `http://localhost:8000/admin/`
-- **Container Logs**: `docker-compose logs -f`
+- **Container Logs:** `docker-compose logs -f`
+- **Django Admin:** `http://localhost:8000/admin/`
+- **RQ Dashboard:** `http://localhost:8000/django-rq/`
 
 ---
 
@@ -254,3 +331,4 @@ docker-compose -f docker-compose.prod.yml up --build
 
 Dieses Backend ist darauf ausgelegt, **nur zusammen mit dem Videoflix Frontend** zu funktionieren und demonstriert professionelle Backend-Entwicklung mit modernen Tools und Best Practices.
 
+**Entwickelt von Philip Schaper für die Developer Akademie** - Ein vollständiges Beispiel für moderne Django-Backend-Architektur.
