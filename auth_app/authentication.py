@@ -69,3 +69,4 @@ class CookieJWTAuthentication(JWTAuthentication):
         except Exception as e:
             logger.error(f"DEBUG: Token validation failed: {e}")
             return None
+            

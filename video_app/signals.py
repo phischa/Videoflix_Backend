@@ -1,5 +1,6 @@
-import logging
 import os
+import shutil
+import logging
 from .models import Video
 from .tasks import queue_video_processing
 from django.dispatch import receiver

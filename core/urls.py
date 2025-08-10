@@ -16,6 +16,7 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from auth_app.api import urls as auth_app_urls
 from video_app.api import urls as video_app_urls
 from django.conf import settings
 from django.conf.urls.static import static
@@ -23,6 +24,7 @@ from django.conf.urls.static import static
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include(video_app_urls)),
+    path('api/', include(auth_app_urls)),
 ]
 
 if not settings.PRODUCTION:
