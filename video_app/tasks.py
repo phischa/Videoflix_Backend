@@ -225,7 +225,7 @@ def generate_thumbnail(video, input_path):
         ffmpeg_cmd = [
             'ffmpeg',
             '-i', input_path,
-            '-ss', '00:00:05',        # Extract at 5-second mark
+            '-ss', '00:00:02',        # Extract at 2-second mark
             '-vframes', '1',          # Only 1 frame
             '-q:v', '2',             # High quality (1-31, lower = better)
             '-y',                    # Overwrite existing file
