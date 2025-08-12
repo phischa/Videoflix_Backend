@@ -147,9 +147,9 @@ class ActivationTokenService:
         # Complete URL
         if frontend_url.endswith('/'):
             frontend_url = frontend_url.rstrip('/')
-        
+    
         activation_url = f"{frontend_url}{activation_path}"
-        
+
         logger.info(f"Created frontend activation URL: {activation_url}")
         return activation_url
     
@@ -290,6 +290,7 @@ class PasswordResetTokenService:
         except Exception as e:
             logger.error(f"Error resetting password for user {user.id}: {e}")
             return False
+
 
 # Convenience functions for direct import
 def generate_activation_token(user: User) -> Tuple[str, str]:
