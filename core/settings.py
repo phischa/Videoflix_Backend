@@ -79,7 +79,7 @@ CORS_ALLOWED_ORIGINS = [
     #"http://127.0.0.1:4200",
     "http://127.0.0.1:5500",  # Für LiveServer
     "http://localhost:5500",  
-    # "https://mydomain.com",  # Production
+    f"http://{os.getenv('SERVER_IP', '')}",  
 ]
 
 CORS_ALLOW_CREDENTIALS = True  # Wichtig für Cookies!
@@ -181,6 +181,25 @@ if PRODUCTION:
     SECURE_REFERRER_POLICY = 'strict-origin-when-cross-origin'
     SECURE_CROSS_ORIGIN_OPENER_POLICY = 'same-origin'
     X_FRAME_OPTIONS = 'DENY'
+
+    LOGGING = {
+        'version': 1,
+        'disable_existing_loggers': False,
+        'handlers': {
+            'file': {
+                'level': 'INFO',
+                'class': 'logging.FileHandler',
+                'filename': '/opt/django-videoflix/logs/django.log',
+            },
+        },
+        'loggers': {
+            'django': {
+                'handlers': ['file'],
+                'level': 'INFO',
+                'propagate': True,
+            },
+        },
+    }
 
 
 EMAIL_TIMEOUT = 30  # Timeout in Sekunden
