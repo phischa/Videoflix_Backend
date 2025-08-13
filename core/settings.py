@@ -26,6 +26,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.getenv('SECRET_KEY')
+if not SECRET_KEY:
+    raise ValueError("SECRET_KEY environment variable is required")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv('DEBUG', 'False').lower() in ('true', '1', 'yes')
@@ -33,7 +35,7 @@ PRODUCTION = os.getenv('PRODUCTION', 'False').lower() == 'true'
 
 ALLOWED_HOSTS = os.environ.get(
     "ALLOWED_HOSTS", 
-    default="localhost,127.0.0.1,0.0.0.0"
+    default="localhost,127.0.0.1"
 ).split(",")
 
 CSRF_TRUSTED_ORIGINS = os.environ.get(
@@ -170,13 +172,15 @@ else:
     EMAIL_USE_SSL = os.getenv('EMAIL_USE_SSL', 'False').lower() == 'true'
     DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', EMAIL_HOST_USER)
 
-if not DEBUG and os.getenv('PRODUCTION', 'False').lower() == 'true':
-    # Production HTTPS Settings
+if PRODUCTION:
     SECURE_SSL_REDIRECT = True
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
     SECURE_BROWSER_XSS_FILTER = True
     SECURE_CONTENT_TYPE_NOSNIFF = True
+    SECURE_REFERRER_POLICY = 'strict-origin-when-cross-origin'
+    SECURE_CROSS_ORIGIN_OPENER_POLICY = 'same-origin'
+    X_FRAME_OPTIONS = 'DENY'
 
 
 EMAIL_TIMEOUT = 30  # Timeout in Sekunden
@@ -284,8 +288,12 @@ else:
 # Static and media files (CSS, JavaScript, Images etc.)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
-STATIC_URL = "/static/"
-STATIC_ROOT = BASE_DIR / "static"
+if PRODUCTION:
+    STATIC_ROOT = "/opt/django-videoflix/static"
+    MEDIA_ROOT = "/opt/django-videoflix/media"
+else:
+    STATIC_ROOT = BASE_DIR / "static"
+    MEDIA_ROOT = BASE_DIR / "media"
 
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
