@@ -299,10 +299,10 @@ SIMPLE_JWT = {
     
 }
 
-if DEBUG:
-    SESSION_COOKIE_SECURE = False  # HTTP erlaubt
+if PRODUCTION:
+    SESSION_COOKIE_SECURE = True   # HTTPS in Production  
 else:
-    SESSION_COOKIE_SECURE = True   # Nur HTTPS
+    SESSION_COOKIE_SECURE = False  # HTTP in Development
 
 # Static and media files (CSS, JavaScript, Images etc.)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
