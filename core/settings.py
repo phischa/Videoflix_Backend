@@ -292,7 +292,7 @@ SIMPLE_JWT = {
     "USER_AUTHENTICATION_RULE": "rest_framework_simplejwt.authentication.default_user_authentication_rule",
     
     # Custom Token Claims
-    "TOKEN_OBTAIN_SERIALIZER": "your_app.serializers.CustomTokenObtainPairSerializer",
+    "TOKEN_OBTAIN_SERIALIZER": "auth_app.serializers.CustomTokenObtainPairSerializer",
     "TOKEN_REFRESH_SERIALIZER": "rest_framework_simplejwt.serializers.TokenRefreshSerializer",
     "TOKEN_VERIFY_SERIALIZER": "rest_framework_simplejwt.serializers.TokenVerifySerializer",
     "TOKEN_BLACKLIST_SERIALIZER": "rest_framework_simplejwt.serializers.TokenBlacklistSerializer",
@@ -314,9 +314,10 @@ else:
     STATIC_ROOT = BASE_DIR / "static"
     MEDIA_ROOT = BASE_DIR / "media"
 
+
+STATIC_URL = "/static/"
 MEDIA_URL = "/media/"
-MEDIA_ROOT = BASE_DIR / "media"
-MAX_FILE_SIZE = 10 * 1024 * 1024 * 1024
+MAX_FILE_SIZE = 5 * 1024 * 1024 * 1024
 
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 

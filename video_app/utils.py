@@ -12,4 +12,4 @@ def validate_file_size(value):
         ValidationError: If file size exceeds configured maximum
     """
     if value.size > settings.MAX_FILE_SIZE:
-        raise ValidationError("File size cannot exceed 10GB")
+        raise ValidationError("File size cannot exceed 5GB")
