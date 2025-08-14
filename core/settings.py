@@ -182,24 +182,24 @@ if PRODUCTION:
     SECURE_CROSS_ORIGIN_OPENER_POLICY = 'same-origin'
     X_FRAME_OPTIONS = 'DENY'
 
-    LOGGING = {
-        'version': 1,
-        'disable_existing_loggers': False,
-        'handlers': {
-            'file': {
-                'level': 'INFO',
-                'class': 'logging.FileHandler',
-                'filename': '/opt/django-videoflix/logs/django.log',
-            },
-        },
-        'loggers': {
-            'django': {
-                'handlers': ['file'],
-                'level': 'INFO',
-                'propagate': True,
-            },
-        },
-    }
+#    LOGGING = {
+#        'version': 1,
+#        'disable_existing_loggers': False,
+#        'handlers': {
+#            'file': {
+#                'level': 'INFO',
+#                'class': 'logging.FileHandler',
+#                'filename': '/opt/django-videoflix/logs/django.log',
+#            },
+#        },
+#        'loggers': {
+#           'django': {
+#                'handlers': ['file'],
+#                'level': 'INFO',
+#                'propagate': True,
+#            },
+#        },
+#    }
 
 
 EMAIL_TIMEOUT = 30  # Timeout in Sekunden
