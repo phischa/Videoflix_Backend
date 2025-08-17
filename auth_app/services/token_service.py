@@ -139,7 +139,7 @@ class ActivationTokenService:
             str: Complete activation URL
         """
         # Frontend URL from settings
-        backend_url = getattr(settings, 'BACKEND_URL', 'http://127.0.0.1:8000')
+        backend_url = getattr(settings, 'BACKEND_URL', 'http://91.98.79.42:8000')
         
         # Activation path
         activation_path = f"/activate/{uidb64}/{token}/"
@@ -254,7 +254,7 @@ class PasswordResetTokenService:
             str: Complete password confirm URL
         """
         # Backend URL from settings
-        backend_url = getattr(settings, 'BACKEND_URL', 'http://127.0.0.1:8000')
+        backend_url = getattr(settings, 'BACKEND_URL', 'http://91.98.79.42:8000')
         
         # Password confirm path
         password_confirm_path = f"/password_confirm/{uidb64}/{token}/"
