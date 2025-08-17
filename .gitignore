@@ -320,3 +320,8 @@ tramp
 # Local development overrides #
 docker-compose.override.yml
 .override.yml
+
+# nginx
+nginx/nginx.local.conf
+nginx/*.log
+docker-compose.override.yml

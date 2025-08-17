@@ -218,7 +218,7 @@ TEMPLATES[0]['DIRS'] = [
 
 ACTIVATION_TOKEN_EXPIRY_HOURS = int(os.getenv('ACTIVATION_TOKEN_EXPIRY_HOURS', 24))
 FRONTEND_URL = os.getenv('FRONTEND_URL', 'http://127.0.0.1:5500')
-BACKEND_URL = os.getenv('BACKEND_URL', 'http://127.0.0.1:8000')
+BACKEND_URL = os.getenv('BACKEND_URL', 'http://91.98.79.42:8000')
 
 
 # Config for Redis and RQ

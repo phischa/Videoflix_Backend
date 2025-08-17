@@ -128,7 +128,7 @@ class ActivationTokenService:
     @staticmethod
     def create_activation_url(uidb64: str, token: str, request=None) -> str:
         """
-        Creates complete activation URL pointing to frontend
+        Creates complete activation URL
         
         Args:
             uidb64: Base64-encoded User-ID
@@ -136,21 +136,21 @@ class ActivationTokenService:
             request: Django Request Object (optional)
             
         Returns:
-            str: Complete frontend activation URL
+            str: Complete activation URL
         """
         # Frontend URL from settings
-        frontend_url = getattr(settings, 'FRONTEND_URL', 'http://127.0.0.1:5500')
+        backend_url = getattr(settings, 'BACKEND_URL', 'http://127.0.0.1:8000')
         
-        # Frontend activation path with parameters (use 'uid' not 'uidb64' for frontend)
-        activation_path = f"/pages/auth/activate.html?uid={uidb64}&token={token}"
+        # Activation path
+        activation_path = f"/activate/{uidb64}/{token}/"
         
         # Complete URL
-        if frontend_url.endswith('/'):
-            frontend_url = frontend_url.rstrip('/')
-    
-        activation_url = f"{frontend_url}{activation_path}"
-
-        logger.info(f"Created frontend activation URL: {activation_url}")
+        if backend_url.endswith('/'):
+            backend_url = backend_url.rstrip('/')
+        
+        activation_url = f"{backend_url}/api{activation_path}"
+        
+        logger.info(f"Created activation URL: {activation_url}")
         return activation_url
     
     @staticmethod
@@ -243,7 +243,7 @@ class PasswordResetTokenService:
     @staticmethod
     def create_password_confirm_url(uidb64: str, token: str, request=None) -> str:
         """
-        Creates complete password confirm URL pointing to frontend
+        Creates complete password confirm URL
         
         Args:
             uidb64: Base64-encoded User-ID
@@ -251,21 +251,21 @@ class PasswordResetTokenService:
             request: Django Request Object (optional)
             
         Returns:
-            str: Complete frontend password confirm URL
+            str: Complete password confirm URL
         """
-        # Frontend URL from settings
-        frontend_url = getattr(settings, 'FRONTEND_URL', 'http://127.0.0.1:5500')
+        # Backend URL from settings
+        backend_url = getattr(settings, 'BACKEND_URL', 'http://127.0.0.1:8000')
         
-        # Frontend password confirm path with parameters (use 'uid' not 'uidb64' for frontend)
-        password_confirm_path = f"/pages/auth/confirm_password.html?uid={uidb64}&token={token}"
+        # Password confirm path
+        password_confirm_path = f"/password_confirm/{uidb64}/{token}/"
         
         # Complete URL
-        if frontend_url.endswith('/'):
-            frontend_url = frontend_url.rstrip('/')
+        if backend_url.endswith('/'):
+            backend_url = backend_url.rstrip('/')
         
-        password_confirm_url = f"{frontend_url}{password_confirm_path}"
+        password_confirm_url = f"{backend_url}/api{password_confirm_path}"
         
-        logger.info(f"Created frontend password reset URL: {password_confirm_url}")
+        logger.info(f"Created password reset URL: {password_confirm_url}")
         return password_confirm_url
     
     @staticmethod
@@ -290,7 +290,6 @@ class PasswordResetTokenService:
         except Exception as e:
             logger.error(f"Error resetting password for user {user.id}: {e}")
             return False
-
 
 # Convenience functions for direct import
 def generate_activation_token(user: User) -> Tuple[str, str]:
@@ -331,4 +330,3 @@ def create_password_confirm_url(uidb64: str, token: str, request=None) -> str:
 def reset_user_password(user: User, new_password: str) -> bool:
     """Shortcut for password reset"""
     return PasswordResetTokenService.reset_user_password(user, new_password)
-    
