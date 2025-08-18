@@ -1,0 +1,349 @@
+# Django #
+*.log
+*.pot
+*.pyc
+__pycache__
+db.sqlite3
+media
+
+# Backup files # 
+*.bak 
+
+# If you are using PyCharm # 
+# User-specific stuff
+.idea/**/workspace.xml
+.idea/**/tasks.xml
+.idea/**/usage.statistics.xml
+.idea/**/dictionaries
+.idea/**/shelf
+
+# AWS User-specific
+.idea/**/aws.xml
+
+# Generated files
+.idea/**/contentModel.xml
+
+# Sensitive or high-churn files
+.idea/**/dataSources/
+.idea/**/dataSources.ids
+.idea/**/dataSources.local.xml
+.idea/**/sqlDataSources.xml
+.idea/**/dynamic.xml
+.idea/**/uiDesigner.xml
+.idea/**/dbnavigator.xml
+
+# Gradle
+.idea/**/gradle.xml
+.idea/**/libraries
+
+# File-based project format
+*.iws
+
+# IntelliJ
+out/
+
+# JIRA plugin
+atlassian-ide-plugin.xml
+
+# Python # 
+*.py[cod] 
+*$py.class 
+
+# Distribution / packaging 
+.Python build/ 
+develop-eggs/ 
+dist/ 
+downloads/ 
+eggs/ 
+.eggs/ 
+lib/ 
+lib64/ 
+parts/ 
+sdist/ 
+var/ 
+wheels/ 
+*.whl
+*.egg-info/ 
+.installed.cfg 
+*.egg 
+*.manifest 
+*.spec 
+
+# Installer logs 
+pip-log.txt 
+pip-delete-this-directory.txt 
+
+# Unit test / coverage reports 
+htmlcov/ 
+.tox/ 
+.coverage 
+.coverage.* 
+.cache 
+.pytest_cache/ 
+nosetests.xml 
+coverage.xml 
+*.cover 
+.hypothesis/ 
+
+# Jupyter Notebook 
+.ipynb_checkpoints 
+
+# pyenv 
+.python-version 
+
+# celery 
+celerybeat-schedule.* 
+
+# SageMath parsed files 
+*.sage.py 
+
+# Environments 
+.env 
+.venv 
+env/ 
+venv/ 
+ENV/ 
+env.bak/ 
+venv.bak/
+
+# mkdocs documentation 
+/site 
+
+# mypy 
+.mypy_cache/ 
+
+# Sublime Text # 
+*.tmlanguage.cache 
+*.tmPreferences.cache 
+*.stTheme.cache 
+*.sublime-workspace 
+*.sublime-project 
+
+# sftp configuration file 
+sftp-config.json 
+
+# Package control specific files Package 
+Control.last-run 
+Control.ca-list 
+Control.ca-bundle 
+Control.system-ca-bundle 
+GitHub.sublime-settings 
+
+# Visual Studio Code # 
+.vscode/* 
+!.vscode/settings.json 
+!.vscode/tasks.json 
+!.vscode/launch.json 
+!.vscode/extensions.json 
+.history
+
+# Scripts
+up.sh
+
+backup.json
+htmlcov
+
+# Bruno 
+/Videoflix
+
+# Additional Environment & Configuration #
+.env
+.env.local
+.env.*.local
+.env.prod*
+.env.dev*
+.env.test*
+
+# SSL/TLS certificates
+*.pem
+*.key
+*.crt
+*.p12
+*.pfx
+
+# Database dumps and backups #
+*.sql
+*.dump
+*.backup
+*.db
+*.sqlite
+*.sqlite3-journal
+
+# Redis dumps #
+dump.rdb
+appendonly.aof
+redis.conf
+*.rdb
+
+# Django additional #
+# Compiled translation files
+*.mo
+
+# Static files (if generated locally)
+staticfiles/
+static_collected/
+static/
+collectstatic/
+
+# Django migrations backup
+migrations/*.py.bak
+
+# Local Django settings
+local_settings.py
+settings_local.py
+
+# OS generated files #
+# macOS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+.AppleDouble
+.LSOverride
+
+# Windows
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+Desktop.ini
+$RECYCLE.BIN/
+*.cab
+*.msi
+*.msix
+*.msm
+*.msp
+
+# Linux
+*~
+.directory
+.Trash-*
+
+# Temporary files #
+*.tmp
+*.temp
+.tmp/
+temp/
+*.swp
+*.swo
+*~
+
+# Additional logs & monitoring #
+*.out
+gunicorn.log
+gunicorn.pid
+celery.log
+django.log
+error.log
+access.log
+
+# Additional testing & development #
+test-results/
+.testmondata
+*.prof
+.pytest_cache/
+.coverage.*
+.nox/
+.tox/
+
+# Node.js (if using frontend tools) #
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.npm
+.yarn-integrity
+
+# Additional Python #
+.Python
+build/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Pipenv
+Pipfile.lock
+
+# Poetry
+poetry.lock
+
+# Security & API Keys #
+.secrets
+secrets.json
+.api_keys
+.credentials
+
+# Docker #
+.dockerignore
+docker-compose.override.yml
+.docker/
+Dockerfile.local
+
+# Terraform (if used for infrastructure) #
+*.tfstate
+*.tfstate.*
+.terraform/
+.terraform.lock.hcl
+
+# Backup and archive files #
+*.7z
+*.dmg
+*.gz
+*.iso
+*.jar
+*.rar
+*.tar
+*.zip
+*.bak
+*.backup
+*.old
+
+# Editor specific #
+# Vim
+*.swp
+*.swo
+*~
+.vimrc
+
+# Emacs
+*~
+\#*\#
+/.emacs.desktop
+/.emacs.desktop.lock
+*.elc
+auto-save-list
+tramp
+.\#*
+
+# Local development overrides #
+docker-compose.override.yml
+.override.yml
+
+# nginx
+nginx/nginx.local.conf
+nginx/*.log
+docker-compose.override.yml
+cookies.txt
+
+# pytest
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Nginx Konfigurationen
+/nginx/
+nginx.conf
+*.nginx.conf
+
+# Log-Dateien
+*.log
+/logs/
+log/
+
+# SSL-Zertifikate und Schlüssel
+*.pem
+*.key
+*.crt
+/ssl/

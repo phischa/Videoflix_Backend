@@ -1,0 +1,76 @@
+services:
+  # Nginx SSL-Termination (NEU)
+  nginx:
+    image: nginx:alpine
+    container_name: videoflix_nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/conf.d:/etc/nginx/conf.d:ro
+      - /etc/ssl/videoflix:/etc/ssl/certs:ro
+      - videoflix_static:/app/static:ro
+      - videoflix_media:/app/media:ro
+    depends_on:
+      - web
+    networks:
+      - videoflix_network
+
+  # Database (unverändert + network)
+  db:
+    image: postgres:latest
+    container_name: videoflix_database
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - videoflix_network
+
+  # Redis (unverändert + network)
+  redis:
+    image: redis:latest
+    container_name: videoflix_redis
+    restart: unless-stopped
+    volumes:
+      - redis_data:/data
+    networks:
+      - videoflix_network
+
+  # Django Backend (PORT GEÄNDERT!)
+  web:
+    build:
+      context: .
+      dockerfile: backend.Dockerfile
+    env_file: .env
+    container_name: videoflix_backend
+    restart: unless-stopped
+    volumes:
+      - .:/app
+      - videoflix_media:/app/media
+      - videoflix_static:/app/static
+      - ./logs:/app/logs
+    expose:
+      - "8000"  # ← NUR intern! (war vorher ports: - "8000:8000")
+    depends_on:
+      - db
+      - redis
+    networks:
+      - videoflix_network
+
+# Volumes (unverändert)
+volumes:
+  postgres_data:
+  redis_data:
+  videoflix_media:
+  videoflix_static:
+
+# Networks (NEU)
+networks:
+  videoflix_network:
+    driver: bridge

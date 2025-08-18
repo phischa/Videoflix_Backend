@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Account aktivieren - Videoflix</title>
+    <style>
+        /* Email-safe CSS */
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            color: #333333;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px 30px;
+            text-align: center;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 28px;
+            font-weight: 600;
+        }
+        .content {
+            padding: 40px 30px;
+        }
+        .welcome-text {
+            font-size: 18px;
+            color: #2c3e50;
+            margin-bottom: 20px;
+        }
+        .message {
+            font-size: 16px;
+            color: #555555;
+            margin-bottom: 30px;
+            line-height: 1.8;
+        }
+        .activation-button {
+            text-align: center;
+            margin: 40px 0;
+        }
+        .btn {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-decoration: none;
+            padding: 16px 32px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 16px;
+            text-align: center;
+            transition: transform 0.2s ease;
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+        .alternative-link {
+            background-color: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 6px;
+            padding: 20px;
+            margin: 30px 0;
+        }
+        .alternative-link p {
+            margin: 0 0 10px 0;
+            font-size: 14px;
+            color: #6c757d;
+        }
+        .alternative-link a {
+            color: #667eea;
+            word-break: break-all;
+            font-size: 14px;
+        }
+        .footer {
+            background-color: #f8f9fa;
+            padding: 30px;
+            text-align: center;
+            border-top: 1px solid #e9ecef;
+        }
+        .footer p {
+            margin: 0;
+            font-size: 14px;
+            color: #6c757d;
+        }
+        .security-info {
+            background-color: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 6px;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        .security-info p {
+            margin: 0;
+            font-size: 14px;
+            color: #856404;
+        }
+        
+        /* Responsive */
+        @media only screen and (max-width: 600px) {
+            .container {
+                width: 100% !important;
+                margin: 0 !important;
+                border-radius: 0 !important;
+            }
+            .header, .content, .footer {
+                padding: 20px !important;
+            }
+            .header h1 {
+                font-size: 24px !important;
+            }
+            .btn {
+                padding: 14px 24px !important;
+                font-size: 14px !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>🎬 Videoflix</h1>
+            <p style="margin: 10px 0 0 0; opacity: 0.9; font-size: 16px;">Willkommen bei der Zukunft des Streamings</p>
+        </div>
+        
+        <!-- Main Content -->
+        <div class="content">
+            <div class="welcome-text">
+                <strong>Hallo {{ user.email }}!</strong>
+            </div>
+            
+            <div class="message">
+                <p>Vielen Dank für Ihre Registrierung bei Videoflix! 🎉</p>
+                
+                <p>Um Ihr Konto zu aktivieren und mit dem Streamen zu beginnen, klicken Sie bitte auf den Button unten. Dies bestätigt Ihre E-Mail-Adresse und schaltet Ihren Account frei.</p>
+            </div>
+            
+            <!-- Activation Button -->
+            <div class="activation-button">
+                <a href="{{ activation_url }}" class="btn">
+                    ✅ Account jetzt aktivieren
+                </a>
+            </div>
+            
+            <!-- Alternative Link -->
+            <div class="alternative-link">
+                <p><strong>Button funktioniert nicht?</strong></p>
+                <p>Kopieren Sie diesen Link und fügen Sie ihn in Ihren Browser ein:</p>
+                <a href="{{ activation_url }}">{{ activation_url }}</a>
+            </div>
+            
+            <!-- Security Info -->
+            <div class="security-info">
+                <p><strong>🔒 Sicherheitshinweis:</strong> Dieser Link ist 24 Stunden gültig und kann nur einmal verwendet werden.</p>
+            </div>
+            
+            <div class="message">
+                <p>Nach der Aktivierung können Sie sich anmelden und haben Zugriff auf:</p>
+                <ul style="color: #555555; padding-left: 20px;">
+                    <li>Tausende von Filmen und Serien</li>
+                    <li>HD und 4K Streaming</li>
+                    <li>Personalisierte Empfehlungen</li>
+                    <li>Downloads für offline Viewing</li>
+                </ul>
+            </div>
+        </div>
+        
+        <!-- Footer -->
+        <div class="footer">
+            <p><strong>Videoflix Team</strong></p>
+            <p style="margin-top: 10px;">
+                Falls Sie diese E-Mail nicht angefordert haben, können Sie sie einfach ignorieren.
+            </p>
+            <p style="margin-top: 15px; font-size: 12px;">
+                © 2025 Videoflix. Alle Rechte vorbehalten.
+            </p>
+        </div>
+    </div>
+</body>
+</html>
