@@ -1,4 +1,3 @@
-
 """
 Token Service for Account Activation
 Uses Django's built-in token generator for secure tokens
