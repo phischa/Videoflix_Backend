@@ -347,3 +347,4 @@ log/
 *.key
 *.crt
 /ssl/
+nginx.conf
