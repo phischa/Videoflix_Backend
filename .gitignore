@@ -336,7 +336,7 @@ htmlcov/
 /nginx/
 nginx.conf
 *.nginx.conf
-nginx.conf
+nginx/nginx.conf
 
 # Log-Dateien
 *.log
