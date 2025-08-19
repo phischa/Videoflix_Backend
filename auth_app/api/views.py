@@ -1,4 +1,5 @@
 import logging
+from django.conf import settings
 from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView, TokenBlacklistView
@@ -127,22 +128,26 @@ class CookieTokenObtainPairView(TokenObtainPairView):
             }
         }, status=status.HTTP_200_OK)
 
+        # In CookieTokenObtainPairView.post() ersetzen:
+        # Access Token Cookie
         response.set_cookie(
             key="access_token",
             value=str(access),
             httponly=True,
-            secure=False,
-            samesite="Lax",
+            secure=settings.PRODUCTION,                    # True for HTTPS in Production
+            samesite="None" if settings.PRODUCTION else "Lax",  # Cross-Domain for Production
+            domain=".philip-schaper.de" if settings.PRODUCTION else None,  # Frontend-Domain
             path="/",
-            domain=None 
         )
 
+        # Refresh Token Cookie  
         response.set_cookie(
             key="refresh_token",
             value=str(refresh),
             httponly=True,
-            secure=False,
-            samesite="Lax"
+            secure=settings.PRODUCTION,                    # True for HTTPS in Production
+            samesite="None" if settings.PRODUCTION else "Lax",  # Cross-Domain for Production
+            domain=".philip-schaper.de" if settings.PRODUCTION else None,  # Frontend-Domain
         )
 
         return response
@@ -183,21 +188,25 @@ class CookieTokenRefreshView(TokenRefreshView):
                     "access": "new_access_token"
                 }, status=status.HTTP_200_OK)
 
+        # Access Token Cookie
         response.set_cookie(
             key="access_token",
             value=access_token,
             httponly=True,
-            secure=False,
-            samesite="Lax"
+            secure=settings.PRODUCTION,
+            samesite="None" if settings.PRODUCTION else "Lax",
+            domain=".philip-schaper.de" if settings.PRODUCTION else None,
         )
 
+        # Refresh Token Cookie (if new_refresh_token)
         if new_refresh_token:
             response.set_cookie(
                 key="refresh_token",
                 value=new_refresh_token,
                 httponly=True,
-                secure=False,
-                samesite="Lax"
+                secure=settings.PRODUCTION,
+                samesite="None" if settings.PRODUCTION else "Lax",
+                domain=".philip-schaper.de" if settings.PRODUCTION else None,
             )
 
         return response

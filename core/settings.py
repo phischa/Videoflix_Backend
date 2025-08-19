@@ -214,6 +214,9 @@ if PRODUCTION:
     SECURE_REFERRER_POLICY = 'strict-origin-when-cross-origin'
     SECURE_CROSS_ORIGIN_OPENER_POLICY = 'same-origin'
     X_FRAME_OPTIONS = 'DENY'
+    # Cross-Domain Cookie Settings hinzufügen:
+    SESSION_COOKIE_SAMESITE = 'None'  # Wichtig für Cross-Domain!
+    CSRF_COOKIE_SAMESITE = 'None'     # Wichtig für Cross-Domain!
 else:
     SESSION_COOKIE_SECURE = False  # HTTP in Development
 
