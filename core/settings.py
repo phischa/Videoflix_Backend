@@ -207,6 +207,8 @@ if PRODUCTION:
     #SECURE_SSL_REDIRECT = True
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
+    SESSION_COOKIE_DOMAIN = '.philip-schaper.de'
+    CSRF_COOKIE_DOMAIN = '.philip-schaper.de'
     SECURE_BROWSER_XSS_FILTER = True
     SECURE_CONTENT_TYPE_NOSNIFF = True
     SECURE_REFERRER_POLICY = 'strict-origin-when-cross-origin'
