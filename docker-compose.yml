@@ -8,7 +8,6 @@ services:
       - "80:80"
       - "443:443"
     volumes:
-      volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
       - ./nginx/conf.d:/etc/nginx/conf.d:ro
       - /etc/letsencrypt:/etc/letsencrypt:ro
@@ -75,3 +74,4 @@ volumes:
 networks:
   videoflix_network:
     driver: bridge
+    
