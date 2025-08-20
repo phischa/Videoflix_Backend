@@ -36,8 +36,8 @@ PRODUCTION = os.getenv('PRODUCTION', 'False').lower() == 'true'
 # ALLOWED_HOSTS Configuration
 if PRODUCTION:
     ALLOWED_HOSTS = [
-        'api-videoflix.duckdns.org',
-        '91.98.79.42',  # Server IP als Fallback
+        'api.philip-schaper.de',     # ← Neue Domain
+        '91.98.79.42',    # Server IP als Fallback
     ]
 else:
     ALLOWED_HOSTS = os.environ.get(
