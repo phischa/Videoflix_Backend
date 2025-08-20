@@ -4,16 +4,10 @@ cd /opt/django-videoflix
 # nginx stoppen
 docker compose stop nginx
 
-# Zertifikat erneuern
+# Zertifikat erneuern (neue Domain)
 certbot renew --quiet
 
-# Neue Zertifikate kopieren
-cp /etc/letsencrypt/live/api-videoflix.duckdns.org/fullchain.pem /etc/ssl/videoflix/
-cp /etc/letsencrypt/live/api-videoflix.duckdns.org/privkey.pem /etc/ssl/videoflix/
-#cp /etc/letsencrypt/live/api-videoflix.duckdns.org/fullchain.pem /opt/django-videoflix/deploy/ssl/
-#cp /etc/letsencrypt/live/api-videoflix.duckdns.org/privkey.pem /opt/django-videoflix/deploy/ssl/
-
-# nginx starten
+# nginx starten (letsencrypt mount funktioniert automatisch)
 docker compose start nginx
 
-echo "SSL certificates renewed successfully"
+echo "SSL certificates renewed successfully for api.philip-schaper.de"

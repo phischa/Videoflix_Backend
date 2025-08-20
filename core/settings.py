@@ -53,12 +53,12 @@ if PRODUCTION:
     ]
     
     CSRF_TRUSTED_ORIGINS = [
-        "https://api-videoflix.duckdns.org",
-        "https://videoflix.philip-schaper.de",
+        "https://api.philip-schaper.de",          # ← Backend Domain
+        "https://videoflix.philip-schaper.de",    # ← Frontend Domain
     ]
     
     FRONTEND_URL = "https://videoflix.philip-schaper.de"
-    BACKEND_URL = "https://api-videoflix.duckdns.org"
+    BACKEND_URL = "https://api.philip-schaper.de" 
     
 else:
     # Development CORS - localhost erlaubt
