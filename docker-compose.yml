@@ -8,9 +8,10 @@ services:
       - "80:80"
       - "443:443"
     volumes:
+      volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
       - ./nginx/conf.d:/etc/nginx/conf.d:ro
-      - /etc/letsencrypt/live/api.philip-schaper.de:/etc/ssl/api-philip:ro 
+      - /etc/letsencrypt:/etc/letsencrypt:ro
       - videoflix_static:/app/static:ro
       - videoflix_media:/app/media:ro
     depends_on:
