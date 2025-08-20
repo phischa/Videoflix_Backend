@@ -204,6 +204,9 @@ else:
 
 # Security settings for production
 if PRODUCTION:
+    # HTTPS Proxy Settings (wichtig für nginx!)
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+    USE_TLS = True
     #SECURE_SSL_REDIRECT = True
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
