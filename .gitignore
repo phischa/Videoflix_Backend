@@ -349,3 +349,4 @@ log/
 *.crt
 /ssl/
 
+requirements.sh
