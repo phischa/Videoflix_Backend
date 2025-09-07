@@ -11,7 +11,7 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
 import os
-import sentry_sdk
+#import sentry_sdk
 from pathlib import Path
 from dotenv import load_dotenv
 from datetime import timedelta
@@ -321,9 +321,9 @@ STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-sentry_sdk.init(
-    dsn="https://465887c4ea597aabcdfbcdb92a390d19@o4509916440297472.ingest.de.sentry.io/4509916446851152",
-    # Add data like request headers and IP for users,
-    # see https://docs.sentry.io/platforms/python/data-management/data-collected/ for more info
-    send_default_pii=True,
-)
+#sentry_sdk.init(
+#    dsn="https://465887c4ea597aabcdfbcdb92a390d19@o4509916440297472.ingest.de.sentry.io/4509916446851152",
+#    # Add data like request headers and IP for users,
+#    # see https://docs.sentry.io/platforms/python/data-management/data-collected/ for more info
+#    send_default_pii=True,
+#)

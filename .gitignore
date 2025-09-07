@@ -350,3 +350,6 @@ log/
 /ssl/
 
 requirements.sh
+
+.env.local
+docker-compose.override.yml
