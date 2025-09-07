@@ -63,14 +63,14 @@ services:
     networks:
       - videoflix_network
 
-# Volumes
+# Volumes (unverändert)
 volumes:
   postgres_data:
   redis_data:
   videoflix_media:
   videoflix_static:
 
-# Networks
+# Networks (NEU)
 networks:
   videoflix_network:
     driver: bridge
